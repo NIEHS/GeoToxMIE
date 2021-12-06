@@ -173,8 +173,8 @@ sim.chem.fun <- function(x){
       }else if(mean.i > 0 & is.na(sd.i)){
         sim.i <- rep(mean.i,MC.iter)
       }else{
-        sim.i <- rtruncnorm(MC.iter,a = 0, b= Inf,mean = sd.i,
-                            sd = mean.i)
+        sim.i <- rtruncnorm(MC.iter,a = 0, b= Inf,mean = mean.i,
+                            sd = sd.i)
       }
       
 
