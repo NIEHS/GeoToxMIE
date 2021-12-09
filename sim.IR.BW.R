@@ -1,8 +1,11 @@
 sim.IR.BW <- function(MC.iter,age.data){
   # Simulate the inhalation rate and body weight based on the age
+  # Written: KPM
+  # QC, 12/8/21, KPM
   
-  
-  
+  # Data comes from https://www.epa.gov/sites/default/files/2015-09/documents/efh-chapter06.pdf
+  # Table 6.7 Distribution percentiles of physiological daily inhalation rates per unit
+  # body weight (m3/kg-day) for free living normal weight males and females aged 2 months to 96 years
   age.lower.bound <- c(0,1,2,5,7,11,23,30,40,65)
   age.upper.bound <- c(1,2,5,7,11,23,30,40,65,100)
   
@@ -10,7 +13,7 @@ sim.IR.BW <- function(MC.iter,age.data){
   sd.male <- c(0.08,0.06,0.04,0.05,0.06,0.05,0.04,0.03,0.04,0.03)
   
   mean.female <- c(0.48,0.45,0.44,0.40,0.35,0.27,0.23,0.24,0.21,0.17)
-  sd.female <- c(0.075,0.08,0.07,0.05,0.06,.05,0.04,0.04,0.04,0.04)
+  sd.female <- c(0.075,0.08,0.07,0.05,0.06,0.05,0.04,0.04,0.04,0.04)
   
   m1 <- apply(cbind(mean.male,mean.female),1,mean)
   sd1 <- apply(cbind(sd.male,sd.female),1,mean)

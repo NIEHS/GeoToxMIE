@@ -1,10 +1,15 @@
 ######################################################
-# Additive Dose Model
+# GeoTox Monte Carlo Analysis for CYP1A1
 # By: Kristin Eccles
+# Edits: Kyle P Messier
 # Date: Oct 22nd, 2021
 # Updated, Run, 12/1/2021
+# QC by KPM, 12/7/2021
 # Written in R Version 4.0.2
+# Description: 
 ######################################################
+#
+#
 # Libraries
 library(ggplot2)
 library(viridis)
@@ -37,11 +42,10 @@ nata_chemicals <- read.csv("/Volumes/SHAG/GeoTox/data/NATA_pollutant_names_casrn
 county_2014 <-st_read("/Volumes/SHAG/GeoTox/data/cb_2014_us_county_5m/cb_2014_us_county_5m.shp")
 
 
-# TOX21 Data
+# TOX21 Data from ICE
 # ice_data <- get(load("210105_ICE_cHTS_invitrodbv33.Rdata"))
 
-# Usually a best practice not to rename variable like this
-# Rename a new variable and remove the old one if need be
+
 ice_data <- subset(ice_data, new_hitc == 1)
 
 epa_data$m4id <-as.numeric(epa_data$m4id )
