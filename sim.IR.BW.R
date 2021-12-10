@@ -3,6 +3,7 @@ sim.IR.BW <- function(MC.iter,age.data){
   # Written: KPM
   # QC, 12/8/21, KPM
   
+  
   # Data comes from https://www.epa.gov/sites/default/files/2015-09/documents/efh-chapter06.pdf
   # Table 6.7 Distribution percentiles of physiological daily inhalation rates per unit
   # body weight (m3/kg-day) for free living normal weight males and females aged 2 months to 96 years

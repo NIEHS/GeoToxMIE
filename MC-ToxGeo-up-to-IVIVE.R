@@ -182,6 +182,7 @@ external.dose.by.county <- lapply(1:length(cyp1a1_up.by.county),sim.chem.fun)
 
 
 
+
 #### air concentration from ug/m3 to mg/m3 then ####
 # inhalation dose - multiply the air concentration by the inhalation rate per body weight 
 
