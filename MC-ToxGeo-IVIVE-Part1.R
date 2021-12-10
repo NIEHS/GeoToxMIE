@@ -1,3 +1,7 @@
+library(httk)
+load_sipes2017()
+httk.data <- get_cheminfo(info="all")
+
 # Chemicals in CYP1A1 and NATA
 in.chems <-  c("98-86-2","92-87-5","92-52-4","117-81-7","133-06-2","532-27-4","133-90-4","57-74-9","510-15-6","94-75-7" ,
  "64-67-5","132-64-9","106-46-7","111-44-4","79-44-7","131-11-3","77-78-1","119-90-4","121-14-2","534-52-1", 
@@ -8,11 +12,11 @@ in.chems <-  c("98-86-2","92-87-5","92-52-4","117-81-7","133-06-2","532-27-4","1
 
 # Create the groups where each row represents a unique
 # combination of age, weight, and kidney categories
-ages <- c("a","b","c","d","e")
+ages <- c("a","b","c","d","e","f","g","h","i","j","k")
 weight <- c("Normal","Obese")
 
 
-group = matrix(NA,nrow = 5*2,ncol = 2)
+group = matrix(NA,nrow = 11*2,ncol = 2)
 l=1
   for (i in ages){
     for (j in weight){
@@ -27,23 +31,35 @@ css.list <- vector(mode = "list", length = length(in.chems))
 
 # Do the loops - by chemical, by group
 MC.iter <- 1000
-val <- matrix(NA,nrow = MC.iter,ncol = 10)
+val <- matrix(NA,nrow = MC.iter,ncol = 22)
 
-for (i in 1:length(in.chems)){
+for (i in 5:length(in.chems)){
   
   for (j in 1:nrow(group)){
     
     print(c(i,j))
     if (group[j,1]=="a"){
-      agelim <- c(0,5)
+      agelim <- c(0,2)
     }else if(group[j,1]=="b"){
-      agelim <- c(6,11)
+      agelim <- c(3,5)
     }else if(group[j,1]=="c"){
-      agelim <- c(12,19)
+      agelim <- c(6,10)
     }else if(group[j,1]=="d"){
-      agelim <- c(20,65)
+      agelim <- c(11,15)
     }else if(group[j,1]=="e"){
-      agelim <- c(66,79)
+      agelim <- c(16,20)
+    }else if(group[j,1]=="f"){
+      agelim <- c(21,30)
+    }else if(group[j,1]=="g"){
+      agelim <- c(31,40)
+    }else if(group[j,1]=="h"){
+      agelim <- c(41,50)
+    }else if(group[j,1]=="i"){
+      agelim <- c(51,60)
+    }else if(group[j,1]=="j"){
+      agelim <- c(61,70)
+    }else if(group[j,1]=="k"){
+      agelim <- c(71,79)
     }
     httkpoplist = list( method = "vi", 
                         gendernum = NULL,
@@ -71,7 +87,7 @@ for (i in 1:length(in.chems)){
 }
 
 
-save(css.list,file = "/Volumes/messierkp/Projects/AEP-AOP/httk_css_pre_simulate.RData")
+save(css.list,file = "/Volumes/messierkp/Projects/AEP-AOP/httk_css_pre_simulate_20211209.RData")
   
-save(css.list,file = "/Volumes/SHAG/GeoTox/data/httk_IVIVE/httk_css_pre_simulate.RData")
+save(css.list,file = "/Volumes/SHAG/GeoTox/data/httk_IVIVE/httk_css_pre_simulate_20211209.RData")
 
