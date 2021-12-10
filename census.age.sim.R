@@ -1,9 +1,10 @@
 census.age.sim <- function(MC.iter, census.age){
-# 
-#
+#  Create a simulated age distribution by county
+#  A utility function for the GeoToxMIE Monte Carlo Analysis
 #
   
-
+  
+# The census.age data is by 5 year age groups and by county from the census
   age.seq <- 0:89
 
   uFIPS <- unique(census.age$FIPS)
@@ -20,9 +21,11 @@ census.age.sim <- function(MC.iter, census.age){
     
     for (j in age.seq){
       
+      # Within each age group, we assume each year is equally probable
       # print(c(i,j))
       idx <- max(age.i$AGEGRP[grp <= j])
       prop.j <- age.i$prop[idx] / 5
+      # j+1 because we iterate starting at 0
       age.mat[i,j+1] <- prop.j
     }
   }
