@@ -1,7 +1,9 @@
 ######################################################
-# Additive Dose Model
+# 
 # By: Kristin Eccles
 # Date: Oct 22nd, 2021
+# Edits: Kyle P Messier
+# QC, 12/8/21, KPM
 # Written in R Version 4.0.2
 ######################################################
 # Libraries
@@ -24,10 +26,8 @@ library(RColorBrewer)
 library(httk)
 library(truncnorm)
 
-#### Section A - Load data and source local functions ####
-###
-##
-#
+
+
 # Load the dataframe with county FIPS, Pollutant Concentration, and EPA/ICE IVIVE data
 county_cyp1a1_up <- get(load("/Volumes/SHAG/GeoTox/data/county_cyp1a1_up_20211109.RData"))
 
@@ -73,17 +73,17 @@ places <- read.csv("/Volumes/SHAG/GeoTox/data/PLACES__County_Data__GIS_Friendly_
 
 
 # Calculate the standard deviation from the confidence internals
-kidney.ci <- str_extract_all(places$KIDNEY_Adj95CI,pattern = "\\d+\\.\\d+") %>%  sapply(as.numeric) %>% t()
+kidney.ci <- str_extract_all(places$KIDNEY_Crude95CI,pattern = "\\d+\\.\\d+") %>%  sapply(as.numeric) %>% t()
 kidney.sd <- (kidney.ci[,2] - kidney.ci[,1])/3.92
 
-obesity.ci <- str_extract_all(places$OBESITY_Adj95CI,pattern = "\\d+\\.\\d+") %>%  sapply(as.numeric) %>% t()
+obesity.ci <- str_extract_all(places$OBESITY_Crude95CI,pattern = "\\d+\\.\\d+") %>%  sapply(as.numeric) %>% t()
 obesity.sd <- (obesity.ci[,2] - obesity.ci[,1])/3.92
 
 places$KIDNEY_SD <- kidney.sd
 places$OBESITY_SD <- obesity.sd
 
 # Subset the columns we need
-places <- places[,c("CountyFIPS","KIDNEY_AdjPrev","KIDNEY_SD","OBESITY_AdjPrev","OBESITY_SD")]
+places <- places[,c("CountyFIPS","OBESITY_CrudePrev","OBESITY_SD")]
 
 # Again, replacing the county FIPS because of a 2010 change
 places$CountyFIPS[places$CountyFIPS==46102] <- 46113
@@ -93,29 +93,12 @@ idx.places <- places$CountyFIPS %in% unique(county_cyp1a1_up$FIPS)
 
 places <- places[idx.places,]
 
-# Simulate the Kidney  by county
-kidney.binom.p <- lapply(1:length(places$KIDNEY_AdjPrev),
-                    function(x)rnorm(MC.iter,places$KIDNEY_AdjPrev,places$KIDNEY_SD)) 
 
 
-kidney.by.county <- lapply(1:length(kidney.binom.p),
-                           function(x)rbinom(MC.iter,size = 1,
-                                             p = kidney.binom.p[[x]]/100)) 
-# Restrict these to be only >=18
-kidney.by.county <- lapply(1:length(kidney.by.county),function(x){
-  val <- rep("Blank",length(kidney.by.county[[x]]))
-  idx <- kidney.by.county[[x]]==0
-  val[idx] = "Normal"
-  idx <- kidney.by.county[[x]]==1
-  val[idx] = "Kidney Disease"
-  val[age.by.county[[x]]<18] = "Normal"
-  return(val)
-  }
-)
 
 # Simulate the Obesity data by county
-obesity.binom.p <- lapply(1:length(places$OBESITY_AdjPrev),
-                         function(x)rnorm(MC.iter,places$OBESITY_AdjPrev,places$OBESITY_SD)) 
+obesity.binom.p <- lapply(1:length(places$OBESITY_CrudePrev),
+                         function(x)rnorm(MC.iter,places$OBESITY_CrudePrev,places$OBESITY_SD)) 
 
 
 obesity.by.county <- lapply(1:length(obesity.binom.p),
@@ -133,13 +116,6 @@ obesity.by.county <- lapply(1:length(obesity.by.county),function(x){
 }
 )
 
-#### Dose-Response CA quantile (synergism <--> antagonism) ####
-# random uniform sampling - MCiter for each county
-# dose.response.by.county <- lapply(1:length(age.by.county),function(x)runif(MC.iter))
-
-#### HTTK IVICE  quantile  ####
-# random uniform sampling - MCiter for each county
-# IVIVE.quant.by.county <- lapply(1:length(age.by.county),function(x)runif(MC.iter))
 
 
 #### Convert the cyp1a1 data to a list by county ####
@@ -202,6 +178,7 @@ external.dose.by.county <- lapply(1:length(cyp1a1_up.by.county),sim.chem.fun)
 # dose.response.by.county
 # IVIVE.quant.by.county
 # cyp1a1_up.by.county
+
 
 
 
