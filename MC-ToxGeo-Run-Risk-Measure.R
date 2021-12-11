@@ -5,7 +5,7 @@ library(truncnorm)
 library(tidyverse)
 
 source("/Volumes/messierkp/Projects/AEP-AOP/tcplHillVal.R", echo=FALSE)
-# load data
+# load data 
 css.by.county <- get(load("/Volumes/SHAG/GeoTox/data/httk_IVIVE/css_by_county_20211209.RData"))
 cyp1a1_up.by.county <- get(load("/Volumes/SHAG/GeoTox/data/CYP1A1_by_county_20211201.RData"))
 uchems <- get(load("/Volumes/SHAG/GeoTox/data/uchems_20211201.RData"))
@@ -105,7 +105,41 @@ run.dr.fun <- function(x){
 final.response.by.county <- lapply(1:length(cyp1a1_up.by.county),run.dr.fun)
 
 
-save(final.response.by.county,file = "/Volumes/SHAG/GeoTox/data/final_response_by_county_20211201.RData")
+save(final.response.by.county,file = "/Volumes/SHAG/GeoTox/data/final_response_by_county_20211209.RData")
+
+
+## Summary Stats
+
+################################################################################################3
+# calculate summary statistics from monte carlo
+summary(final.response.by.county)
+
+dr.median <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) median(x$DR))))
+colnames(dr.median) <- "DR.median"
+dr.mean <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) mean(x$DR))))
+colnames(dr.mean) <- "DR.mean"
+dr.95.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$DR, 0.95))))
+colnames(dr.95.quantile) <- "DR.95.quantile"
+dr.5.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$DR, 0.05))))
+colnames(dr.5.quantile) <- "DR.5.quantile"
+
+hq.median <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) median(x$HQ))))
+colnames(hq.median) <- "HQ.median"
+hq.mean <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) mean(x$HQ))))
+colnames(hq.mean) <- "HQ.mean"
+hq.95.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$HQ, 0.95))))
+colnames(hq.95.quantile) <- "HQ.95.quantile"
+hq.5.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$HQ, 0.05))))
+colnames(hq.5.quantile) <- "HQ.5.quantile"
+
+load ("/Volumes/SHAG/GeoTox/data/FIPS_by_county.RData")
+FIPS <- as.data.frame(FIPS)
+
+ivive.summary.df<- cbind(FIPS, dr.median, dr.mean, dr.95.quantile, dr.5.quantile,
+                         hq.median, hq.mean, hq.95.quantile, hq.5.quantile)
+
+write.csv(ivive.summary.df, "/Volumes/SHAG/GeoTox/data/httk_IVIVE/mc_all_summary_df.csv")
+
 
 # Some test plotting
 convert.fun <- function(x){

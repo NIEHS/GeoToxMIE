@@ -1,4 +1,7 @@
 ##################################################################################################
+# Sensitivity analysis - varying obesity 
+# Written: KME, 12/7/21 
+# Contributions: KPM, 12/9/21
 
 #### Simulatation by county ####
 # external.exposure.by.county
@@ -45,6 +48,7 @@ MC.iter <- 10^3
 
 #Note: Run Order #2
 
+
 #### Section A - Load data and source local functions ####
 ###
 ##
@@ -75,12 +79,12 @@ census.age.overlap <- census.age[idx.FIPS,]
 
 age.by.county <- census.age.sim(MC.iter,census.age.overlap)
 
-# SENSITIVITY AGE - uncomment to hold constant
-age.by.county.mean<- lapply(age.by.county, FUN= function (x) round(mean(x)))
-age.by.county <- lapply(age.by.county.mean, FUN = function (x) replicate(MC.iter, x))
+# SENSITIVITY AGE - uncomment hold age constant
+age.by.county.median<- lapply(age.by.county, FUN= function (x) median(x))
+age.by.county.median <- lapply(age.by.county.median, FUN = function (x) replicate(MC.iter, x))
 
 #### Inhalation Rate per body weight-by age #####
-IR.by.county <- sim.IR.BW(MC.iter,age.by.county)
+IR.by.county <- sim.IR.BW(MC.iter,age.by.county.median)
 
 #### CDC PLACES data on Obesity prevalence ####
 
@@ -113,9 +117,9 @@ obesity.by.county <- lapply(1:length(obesity.binom.p),
                             function(x)rbinom(MC.iter,size = 1,
                                               p = obesity.binom.p[[x]]/100)) 
 
-# SENSITIVITY OBESITY - uncomment to hold constant
-#obesity.by.county.mean<- lapply(obesity.by.county, FUN= function (x) round(mean(x)))
-#obesity.by.county <- lapply(obesity.by.county.mean, FUN = function (x) replicate(MC.iter, x))
+#SENSITIVITY OBESITY - uncomment to hold contant
+# obesity.by.county.median<- lapply(obesity.by.county, FUN= function (x) round(median(x)))
+# obesity.by.county <- lapply(obesity.by.county.median, FUN = function (x) replicate(MC.iter, x))
 
 # Restrict these to be only >=18
 obesity.by.county <- lapply(1:length(obesity.by.county),function(x){
@@ -153,9 +157,10 @@ sim.chem.fun <- function(x){
       #                  cyp1a1_up.by.county[[x]]$concentration_sd[i])
       
       mean.i <- cyp1a1_up.by.county[[x]]$concentration_mean[i]
-      sd.i <- cyp1a1_up.by.county[[x]]$concentration_sd[i]
-      
-# SENSITIVITY EXTERNAL CONCENTRATION- uncomment to hold constant
+
+
+#SENSITIVITY EXTERNAL CONCENTRATION- UNCOMMENT TO HOLD CONTSTANT
+      #sd.i <- cyp1a1_up.by.county[[x]]$concentration_sd[i]
       sd.i = 0
       
       if (mean.i==0){
@@ -194,13 +199,12 @@ inhalation.dose.by.county <- lapply(1:length(external.dose.by.county),convert.fu
 uchems <- cyp1a1_up.by.county[[1]]$casrn %>% unique()
 
 ####################################################################################
-# SENSITIVITY CSS 
-
-load("~/Desktop/geo_ivive/css_by_county_20211129.RData")
 
 # To hold CSS constant
-css.by.county.mean<- lapply(css.by.county, FUN= function (x) mean(x))
-css.by.county <- lapply(css.by.county.mean, FUN = function (x) replicate(MC.iter, x))
+# load the sensitivity IVIVE data - css.sensitivity.age
+load("/Volumes/SHAG/GeoTox/data/httk_IVIVE/css_by_county_sensitivity_obesity.RData")
+
+
 ####################################################################################
 #### MC-ToxGeo-Run-Risk-Measure ####
 # Notes: Run order #5
@@ -221,15 +225,17 @@ for (i in 1:length(inhalation.dose.by.county)){
 }
 
 # Calculate the in-vitro dose using the Css
+# Css pre-calculated to only include variability from age 
 invitro.fun <- function(x){
   
-  invitro <- inhalation.dose.by.county[[x]] * css.by.county[[x]]
+  invitro <- inhalation.dose.by.county[[x]] * css.sensitivity.obesity[[x]]
   return(invitro)
 }
 
 invitro.conc.by.county <- lapply(1:length(inhalation.dose.by.county),invitro.fun)
 
-# Proportion of each chemical by county
+# Proportion of each chemical by css
+
 proportion.fun <- function(x){
   # Get each MC iterations invtro dose sum across all chemicals
   mc.sums <- rowSums(invitro.conc.by.county[[x]])
@@ -245,16 +251,16 @@ run.dr.fun <- function(x){
   tp.mean <- cyp1a1_up.by.county[[x]]$hill_tp %>% as.numeric()
   AC50.mean <- cyp1a1_up.by.county[[x]]$hill_ga %>% as.numeric()
   slope.mean <- cyp1a1_up.by.county[[x]]$hill_gw %>% as.numeric()
-
-
-# SENSITIVITY ANALYSIS DOSE-RESPONSE - Uncomment to hold constant  
-  slope.sd <- 0
-  tp.sd <- 0
-  AC50.sd <-0
   
+  #Sensitivity Analysis- Uncomment to hold constant 
   #AC50.sd <- cyp1a1_up.by.county[[x]]$hill_ga_sd %>% as.numeric()
   #slope.sd <- cyp1a1_up.by.county[[x]]$hill_gw_sd %>% as.numeric()
   #tp.sd <- cyp1a1_up.by.county[[x]]$hill_tp_sd %>% as.numeric()
+  
+  
+  slope.sd <- 0
+  tp.sd <- 0
+  AC50.sd <-0
   
   # Simulation constraints based on TCPL pipeline
   # For the log10-AC50, we use the minimum of the observed response from the assays
@@ -279,9 +285,9 @@ run.dr.fun <- function(x){
   # Add the doses by chemical for each MC.iter
   dose.sum <- log10(rowSums(invitro.conc.by.county[[x]]))
   # Do the additivity based on the  concentration weighting
-  tp.val <- rowMeans(tp.sim * proportion.by.county[[x]])
-  AC50.val <- rowMeans(AC50.sim * proportion.by.county[[x]])
-  slope.val <- rowMeans(slope.sim * proportion.by.county[[x]])
+  tp.val <- rowSums(tp.sim * proportion.by.county[[x]])
+  AC50.val <- rowSums(AC50.sim * proportion.by.county[[x]])
+  slope.val <- rowSums(slope.sim * proportion.by.county[[x]])
   
   # CALCULATE THE DOSE RESPONSE!
   dose.response <- tcplHillVal(dose.sum,tp.val,AC50.val,slope.val)
@@ -296,10 +302,10 @@ run.dr.fun <- function(x){
 final.response.by.county <- lapply(1:length(cyp1a1_up.by.county),run.dr.fun)
 
 
-save(final.response.by.county,file = "sensitivity_dr_obesity2.RData")
+save(final.response.by.county,file = "/Volumes/SHAG/GeoTox/data/httk_IVIVE/sensitivity_results_obesity.RData")
 
 ######################################################################################
-load ("sensitivity_dr_obesity2.RData")
+#load("/Volumes/SHAG/GeoTox/data/httk_IVIVE/sensitivity_results_obesity.RData")
 # Spatial Data
 # state
 states <- st_as_sf(maps::map("state", plot = FALSE, fill = TRUE))
@@ -341,9 +347,12 @@ colnames(hq.5.quantile) <- "HQ.5.quantile"
 ivive.summary.df<- cbind(FIPS, dr.median, dr.mean, dr.95.quantile, dr.5.quantile,
                          hq.median, hq.mean, hq.95.quantile, hq.5.quantile)
 summary(ivive.summary.df)
-write.csv(ivive.summary.df, "obesity_ivive_summary_df2.csv")
+write.csv(ivive.summary.df, "/Volumes/SHAG/GeoTox/data/httk_IVIVE/obesity_ivive_sensitivity_summary_df.csv")
 ####################################################################################################
 #### DOSE RESPONSE ####
+
+states <- st_as_sf(map("state", plot = FALSE, fill = TRUE))
+
 ivive_county_cyp1a1_up_sp<- left_join(county_2014, ivive.summary.df, by=c("countyid" = "FIPS"), keep=FALSE)
 ivive_county_cyp1a1_up_sf <-st_as_sf(ivive_county_cyp1a1_up_sp)
 
@@ -400,10 +409,8 @@ hq_cyp1a1_up_5q <- ggplot(data = ivive_county_cyp1a1_up_sf, aes(fill=HQ.5.quanti
 ##### Compile Figures ####
 
 #Compile
-sensitivity.obesity.dr.hq.figure = ggarrange(dr_cyp1a1_up_5q, 
-                                              hq_cyp1a1_up_5q,
-                       dr_cyp1a1_up_median,
-                       hq_cyp1a1_up_median,
+sensitivity.age.dr.hq.figure = ggarrange(dr_cyp1a1_up_5q, hq_cyp1a1_up_5q,
+                       dr_cyp1a1_up_median,hq_cyp1a1_up_median,
                        dr_cyp1a1_up_95q, hq_cyp1a1_up_95q,
                        labels = c("(A) 5th Percentile ", "(D) 5th Percentile",
                                   "(B) Median", "(E) Median",
@@ -415,7 +422,7 @@ sensitivity.obesity.dr.hq.figure = ggarrange(dr_cyp1a1_up_5q,
                        common.legend = FALSE,
                        legend = "right")
 
-save_plot("sensitivity.obesity.dr.hq.figure2.tif", sensitivity.obesity.dr.hq.figure, width = 40, height = 30, dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/httk_IVIVE/sensitivity.age.dr.hq.figure2.tif", sensitivity.age.dr.hq.figure, width = 40, height = 30, dpi = 200)
 
 
 
