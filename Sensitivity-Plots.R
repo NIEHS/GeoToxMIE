@@ -11,7 +11,7 @@ library(dplyr)
 
 #Load data
 all <- read.csv("mc_ivive_summary_df.csv")
-age <- read.csv("age_ivive_summary_df2.csv")
+age <- read.csv("/Volumes/SHAG/GeoTox/data/httk_IVIVE/age_ivive_sensitivity_summary_df.csv")
 obesity <- read.csv("obesity_ivive_summary_df2.csv")
 external <- read.csv("external_ivive_summary_df2.csv")
 dr <- read.csv("dr_ivive_summary_df2.csv")

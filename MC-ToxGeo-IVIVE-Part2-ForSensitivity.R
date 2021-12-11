@@ -117,5 +117,11 @@ for (i in 1:length(age.by.county)){
   
 }
 
-save(css.sensitivity.age,css.sensitivity.obesity,css.sensitivity.httk,
-     file = "/Volumes/SHAG/GeoTox/data/httk_IVIVE/css_by_county_sensitivity.RData")
+save(css.sensitivity.obesity,
+     file = "/Volumes/SHAG/GeoTox/data/httk_IVIVE/css_by_county_sensitivity_obesity.RData")
+
+save(css.sensitivity.age,
+     file = "/Volumes/SHAG/GeoTox/data/httk_IVIVE/css_by_county_sensitivity_age.RData")
+
+save(css.sensitivity.httk,
+     file = "/Volumes/SHAG/GeoTox/data/httk_IVIVE/css_by_county_sensitivity_httk.RData")

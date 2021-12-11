@@ -48,6 +48,7 @@ MC.iter <- 10^3
 
 #Note: Run Order #2
 
+
 #### Section A - Load data and source local functions ####
 ###
 ##
@@ -117,8 +118,8 @@ obesity.by.county <- lapply(1:length(obesity.binom.p),
                                               p = obesity.binom.p[[x]]/100)) 
 
 #SENSITIVITY OBESITY - uncomment to hold contant
-obesity.by.county.mean<- lapply(obesity.by.county, FUN= function (x) round(mean(x)))
-obesity.by.county <- lapply(obesity.by.county.mean, FUN = function (x) replicate(MC.iter, x))
+obesity.by.county.median<- lapply(obesity.by.county, FUN= function (x) round(median(x)))
+obesity.by.county <- lapply(obesity.by.county.median, FUN = function (x) replicate(MC.iter, x))
 
 # Restrict these to be only >=18
 obesity.by.county <- lapply(1:length(obesity.by.county),function(x){
@@ -198,13 +199,11 @@ inhalation.dose.by.county <- lapply(1:length(external.dose.by.county),convert.fu
 uchems <- cyp1a1_up.by.county[[1]]$casrn %>% unique()
 
 ####################################################################################
-css.by.county <- get(load("/Volumes/SHAG/GeoTox/data/httk_IVIVE/css_by_county_20211209.RData"))
 
 # To hold CSS constant
-css.by.age.median<- sapply(css.list, FUN= function (x) median(x))
-css.by.county.test<- sapply(css.by.county, FUN= function (x) mean(x,na.rm = TRUE))
+# load the sensitivity IVIVE data - css.sensitivity.age
+load("/Volumes/SHAG/GeoTox/data/httk_IVIVE/css_by_county_sensitivity_age.RData")
 
-css.by.county.test <- lapply(css.by.county.test, FUN = function (x) replicate(MC.iter, x))
 
 ####################################################################################
 #### MC-ToxGeo-Run-Risk-Measure ####
@@ -226,9 +225,10 @@ for (i in 1:length(inhalation.dose.by.county)){
 }
 
 # Calculate the in-vitro dose using the Css
+# Css pre-calculated to only include variability from age 
 invitro.fun <- function(x){
   
-  invitro <- inhalation.dose.by.county[[x]] * css.by.county[[x]]
+  invitro <- inhalation.dose.by.county[[x]] * css.sensitivity.age[[x]]
   return(invitro)
 }
 
@@ -285,9 +285,9 @@ run.dr.fun <- function(x){
   # Add the doses by chemical for each MC.iter
   dose.sum <- log10(rowSums(invitro.conc.by.county[[x]]))
   # Do the additivity based on the  concentration weighting
-  tp.val <- rowMeans(tp.sim * proportion.by.county[[x]])
-  AC50.val <- rowMeans(AC50.sim * proportion.by.county[[x]])
-  slope.val <- rowMeans(slope.sim * proportion.by.county[[x]])
+  tp.val <- rowSums(tp.sim * proportion.by.county[[x]])
+  AC50.val <- rowSums(AC50.sim * proportion.by.county[[x]])
+  slope.val <- rowSums(slope.sim * proportion.by.county[[x]])
   
   # CALCULATE THE DOSE RESPONSE!
   dose.response <- tcplHillVal(dose.sum,tp.val,AC50.val,slope.val)
@@ -302,10 +302,10 @@ run.dr.fun <- function(x){
 final.response.by.county <- lapply(1:length(cyp1a1_up.by.county),run.dr.fun)
 
 
-save(final.response.by.county,file = "sensitivity_dr_age2.RData")
+save(final.response.by.county,file = "/Volumes/SHAG/GeoTox/data/httk_IVIVE/sensitivity_results_age.RData")
 
 ######################################################################################
-load("sensitivity_dr_age2.RData")
+load("/Volumes/SHAG/GeoTox/data/httk_IVIVE/sensitivity_results_age.RData")
 # Spatial Data
 # state
 states <- st_as_sf(maps::map("state", plot = FALSE, fill = TRUE))
@@ -347,7 +347,7 @@ colnames(hq.5.quantile) <- "HQ.5.quantile"
 ivive.summary.df<- cbind(FIPS, dr.median, dr.mean, dr.95.quantile, dr.5.quantile,
                          hq.median, hq.mean, hq.95.quantile, hq.5.quantile)
 summary(ivive.summary.df)
-write.csv(ivive.summary.df, "age_ivive_summary_df2.csv")
+write.csv(ivive.summary.df, "/Volumes/SHAG/GeoTox/data/httk_IVIVE/age_ivive_sensitivity_summary_df.csv")
 ####################################################################################################
 #### DOSE RESPONSE ####
 
@@ -422,7 +422,7 @@ sensitivity.age.dr.hq.figure = ggarrange(dr_cyp1a1_up_5q, hq_cyp1a1_up_5q,
                        common.legend = FALSE,
                        legend = "right")
 
-save_plot("sensitivity.age.dr.hq.figure2.tif", sensitivity.age.dr.hq.figure, width = 40, height = 30, dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/httk_IVIVE/sensitivity.age.dr.hq.figure2.tif", sensitivity.age.dr.hq.figure, width = 40, height = 30, dpi = 200)
 
 
 

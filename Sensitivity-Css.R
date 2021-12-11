@@ -78,58 +78,12 @@ census.age.overlap <- census.age[idx.FIPS,]
 age.by.county <- census.age.sim(MC.iter,census.age.overlap)
 
 # SENSITIVITY AGE - uncomment to hold constant
-age.by.county.mean<- lapply(age.by.county, FUN= function (x) round(mean(x)))
-age.by.county <- lapply(age.by.county.mean, FUN = function (x) replicate(MC.iter, x))
+age.by.county.median<- lapply(age.by.county, FUN= function (x) round(median(x)))
+age.by.county.median <- lapply(age.by.county.median, FUN = function (x) replicate(MC.iter, x))
 
 #### Inhalation Rate per body weight-by age #####
-IR.by.county <- sim.IR.BW(MC.iter,age.by.county)
+IR.by.county <- sim.IR.BW(MC.iter,age.by.county.median)
 
-#### CDC PLACES data on Obesity prevalence ####
-
-# Read in the Places data from the SHAG shared drive
-places <- read.csv("/Volumes/SHAG/GeoTox/data/PLACES__County_Data__GIS_Friendly_Format___2020_release.csv")
-
-# Calculate the standard deviation from the confidence internals
-
-obesity.ci <- str_extract_all(places$OBESITY_Crude95CI,pattern = "\\d+\\.\\d+") %>%  sapply(as.numeric) %>% t()
-obesity.sd <- (obesity.ci[,2] - obesity.ci[,1])/3.92
-
-places$OBESITY_SD <- obesity.sd
-
-# Subset the columns we need
-places <- places[,c("CountyFIPS","OBESITY_CrudePrev","OBESITY_SD")]
-
-# Again, replacing the county FIPS because of a 2010 change
-places$CountyFIPS[places$CountyFIPS==46102] <- 46113
-
-# index and remove places counties outside conterminous US
-idx.places <- places$CountyFIPS %in% unique(county_cyp1a1_up$FIPS)
-
-places <- places[idx.places,]
-
-# Simulate the Obesity data by county
-obesity.binom.p <- lapply(1:length(places$OBESITY_CrudePrev),
-                          function(x)rnorm(MC.iter,places$OBESITY_CrudePrev,places$OBESITY_SD)) 
-
-obesity.by.county <- lapply(1:length(obesity.binom.p),
-                            function(x)rbinom(MC.iter,size = 1,
-                                              p = obesity.binom.p[[x]]/100)) 
-
-# SENSITIVITY OBESITY - uncomment to hold constant
-obesity.by.county.mean<- lapply(obesity.by.county, FUN= function (x) round(mean(x)))
-obesity.by.county <- lapply(obesity.by.county.mean, FUN = function (x) replicate(MC.iter, x))
-
-# Restrict these to be only >=18
-obesity.by.county <- lapply(1:length(obesity.by.county),function(x){
-  val <- rep("Blank",length(obesity.by.county[[x]]))
-  idx <- obesity.by.county[[x]]==0
-  val[idx] = "Normal"
-  idx <- obesity.by.county[[x]]==1
-  val[idx] = "Obese"
-  val[age.by.county[[x]]<18] = "Normal"
-  return(val)
-}
-)
 
 #### Convert the cyp1a1 data to a list by county ####
 cyp1a1_up.by.county <- split(county_cyp1a1_up,as.factor(county_cyp1a1_up$FIPS))
@@ -151,7 +105,7 @@ sim.chem.fun <- function(x){
   }else{
     for (i in 1:ncol(val)){
       
-      # val[,i] <- rnorm(MC.iter,cyp1a1_up.by.county[[x]]$concentration_mean[i],
+      # val[,i] <- rnorm(MC.iter,cyp1a1_up.by.county[[x]]$concentration_median[i],
       #                  cyp1a1_up.by.county[[x]]$concentration_sd[i])
       
       mean.i <- cyp1a1_up.by.county[[x]]$concentration_mean[i]
@@ -196,164 +150,7 @@ inhalation.dose.by.county <- lapply(1:length(external.dose.by.county),convert.fu
 uchems <- cyp1a1_up.by.county[[1]]$casrn %>% unique()
 
 ####################################################################################
-#### MC-ToxGeo-IVIVE-Part1 ####
-# Notes: Run Order #3
-#
-# # Chemicals in CYP1A1 and NATA
-in.chems <-  c("98-86-2","92-87-5","92-52-4","117-81-7","133-06-2","532-27-4","133-90-4","57-74-9","510-15-6","94-75-7" ,
-               "64-67-5","132-64-9","106-46-7","111-44-4","79-44-7","131-11-3","77-78-1","119-90-4","121-14-2","534-52-1",
-               "51-28-5","121-69-7","107-21-1","51-79-6","76-44-8","822-06-0","77-47-4","123-31-9","72-43-5" ,
-               "101-77-9","56-38-2","82-68-8","87-86-5","1120-71-4", "114-26-1","91-22-5","96-09-3","95-80-7","584-84-9" ,
-                "95-95-4","1582-09-8")
-
-# Create the groups where each row represents a unique
-# combination of age, weight, and kidney categories
- ages <- c("a","b","c","d","e")
- weight <- c("Normal","Obese")
-
-
- group = matrix(NA,nrow = 5*2,ncol = 2)
- l=1
- for (i in ages){
-   for (j in weight){
-
-     group[l,] <- c(i,j)
-     l=l+1
-   }
- }
-
- #Load QSAR predictions from Sipes 2017:
- load_sipes2017()
-
-#Create a table with all human HTTK data:
- httk.data <- get_cheminfo(info="all")
-
-  #Preallocate a list
- css.list <- vector(mode = "list", length = length(in.chems))
-
-#  Do the loops - by chemical, by group
- MC.iter <- 1000
- val <- matrix(NA,nrow = MC.iter,ncol = 10)
-
- for (i in 1:length(in.chems)){
-
-   for (j in 1:nrow(group)){
-
-     print(c(i,j))
-     if (group[j,1]=="a"){
-       agelim <- c(0,5)
-     }else if(group[j,1]=="b"){
-       agelim <- c(6,11)
-     }else if(group[j,1]=="c"){
-       agelim <- c(12,19)
-     }else if(group[j,1]=="d"){
-       agelim <- c(20,65)
-     }else if(group[j,1]=="e"){
-       agelim <- c(66,79)
-     }
-     httkpoplist = list( method = "vi",
-                         gendernum = NULL,
-                         agelim_years = agelim,
-                         agelim_months = NULL,
-                         weight_category = group[j,2],
-                         reths =c(
-                           "Mexican American",
-                           "Other Hispanic",
-                           "Non-Hispanic White",
-                           "Non-Hispanic Black",
-                           "Other"
-                         ))
-
-     mcs <- create_mc_samples(chem.cas = in.chems[i],samples = MC.iter,httkpop.generate.arg.list = httkpoplist)
-     css <- calc_analytic_css(chem.cas = in.chems[i],parameters = mcs, model = "3compartmentss")
-
-     val[,j] <- css
-
-
-
-   }
-
-   css.list[[i]] <- val
- }
-
-css.list
-
-####################################################################################
-#### MC-ToxGeo-IVIVE-Part2 ####
-
-# Notes: Run order #4
-
-# Groups
-
- ages <- c("a","b","c","d","e")
- weight <- c("Normal","Obese")
-
-
- group = matrix(NA,nrow = 5*2,ncol = 2)
- l=1
- for (i in ages){
-   for (j in weight){
-
-     group[l,] <- c(i,j)
-     l=l+1
-   }
- }
-
-
- print(c(i,j))
-
- css.by.county <- NULL
- for (i in 1:length(age.by.county)){
-
-   css.by.county[[i]]<- matrix(NA,nrow = MC.iter,ncol = 41)
-
-   idx.age.group1 <- age.by.county[[i]]<=5
-   idx.age.group2 <- age.by.county[[i]]>=6 & age.by.county[[i]]<=11
-   idx.age.group3 <- age.by.county[[i]]>=12 & age.by.county[[i]]<=19
-   idx.age.group4 <- age.by.county[[i]]>=20 & age.by.county[[i]]<=65
-   idx.age.group5 <- age.by.county[[i]]>=66
-
-   idx.obesity1 <- obesity.by.county[[i]] == "Normal"
-   idx.obesity2 <- obesity.by.county[[i]] == "Obese"
-
-for (j in 1:41){  #For each chemical
-     print(c(i,j))
-      #Group 1
-     idx.1 <-idx.age.group1 & idx.obesity1
-     css.by.county[[i]][idx.1,] <- sample(css.list[[j]][,1],sum(idx.1),replace = TRUE)
-      #Group 2
-     idx.2 <-idx.age.group1 & idx.obesity2
-     css.by.county[[i]][idx.2,] <- sample(css.list[[j]][,2],sum(idx.2),replace = TRUE)
-      #Group 3
-     idx.3 <-idx.age.group2 & idx.obesity1
-     css.by.county[[i]][idx.3,] <- sample(css.list[[j]][,3],sum(idx.3),replace = TRUE)
-      #Group 4
-     idx.4 <-idx.age.group2 & idx.obesity2
-     css.by.county[[i]][idx.4,] <- sample(css.list[[j]][,4],sum(idx.4),replace = TRUE)
-      #Group 5
-     idx.5 <-idx.age.group3 & idx.obesity1
-     css.by.county[[i]][idx.5,] <- sample(css.list[[j]][,5],sum(idx.5),replace = TRUE)
-      #Group 6
-     idx.6 <-idx.age.group3 & idx.obesity2
-     css.by.county[[i]][idx.6,] <- sample(css.list[[j]][,6],sum(idx.6),replace = TRUE)
-      #Group 7
-     idx.7 <-idx.age.group4 & idx.obesity1
-     css.by.county[[i]][idx.7,] <- sample(css.list[[j]][,7],sum(idx.7),replace = TRUE)
-      #Group 8
-     idx.8 <-idx.age.group4 & idx.obesity2
-     css.by.county[[i]][idx.8,] <- sample(css.list[[j]][,8],sum(idx.8),replace = TRUE)
-      #Group 9
-     idx.9 <-idx.age.group5 & idx.obesity1
-     css.by.county[[i]][idx.9,] <- sample(css.list[[j]][,9],sum(idx.9),replace = TRUE)
-      #Group 10
-     idx.10 <-idx.age.group5 & idx.obesity2
-     css.by.county[[i]][idx.10,] <- sample(css.list[[j]][,10],sum(idx.10),replace = TRUE)
-
-   }
-
-
-
- }
+load("/Volumes/SHAG/GeoTox/data/httk_IVIVE/css_by_county_sensitivity_httk.RData")
 
 
 ####################################################################################
@@ -378,7 +175,7 @@ for (i in 1:length(inhalation.dose.by.county)){
 # Calculate the in-vitro dose using the Css
 invitro.fun <- function(x){
   
-  invitro <- inhalation.dose.by.county[[x]] * css.by.county[[x]]
+  invitro <- inhalation.dose.by.county[[x]] * css.sensitivity.httk[[x]]
   return(invitro)
 }
 
@@ -435,9 +232,9 @@ run.dr.fun <- function(x){
   # Add the doses by chemical for each MC.iter
   dose.sum <- log10(rowSums(invitro.conc.by.county[[x]]))
   # Do the additivity based on the  concentration weighting
-  tp.val <- rowMeans(tp.sim * proportion.by.county[[x]])
-  AC50.val <- rowMeans(AC50.sim * proportion.by.county[[x]])
-  slope.val <- rowMeans(slope.sim * proportion.by.county[[x]])
+  tp.val <- rowSums(tp.sim * proportion.by.county[[x]])
+  AC50.val <- rowSums(AC50.sim * proportion.by.county[[x]])
+  slope.val <- rowSums(slope.sim * proportion.by.county[[x]])
   
   # CALCULATE THE DOSE RESPONSE!
   dose.response <- tcplHillVal(dose.sum,tp.val,AC50.val,slope.val)
@@ -452,10 +249,10 @@ run.dr.fun <- function(x){
 final.response.by.county <- lapply(1:length(cyp1a1_up.by.county),run.dr.fun)
 
 
-save(final.response.by.county,file = "sensitivity_css.RData")
+save(final.response.by.county,file = "/Volumes/SHAG/GeoTox/data/httk_IVIVE/sensitivity_results_httk.RData")
 
 ######################################################################################
-load ("sensitivity_css.RData")
+#load ("/Volumes/SHAG/GeoTox/data/httk_IVIVE/sensitivity_results_httk.RData")
 # Spatial Data
 # state
 states <- st_as_sf(maps::map("state", plot = FALSE, fill = TRUE))
@@ -497,51 +294,7 @@ colnames(hq.5.quantile) <- "HQ.5.quantile"
 ivive.summary.df<- cbind(FIPS, dr.median, dr.mean, dr.95.quantile, dr.5.quantile,
                          hq.median, hq.mean, hq.95.quantile, hq.5.quantile)
 summary(ivive.summary.df)
-write.csv(ivive.summary.df, "css_ivive_summary_df.csv")
-####################################################################################################
-load ("sensitivity_dr_css.RData")
-# Spatial Data
-# state
-states <- st_as_sf(maps::map("state", plot = FALSE, fill = TRUE))
-
-#county 
-county_2014 <-st_read("/Volumes/SHAG/GeoTox/data/cb_2014_us_county_5m/cb_2014_us_county_5m.shp")
-county_2014$GEOID <- as.numeric(county_2014$GEOID)
-
-#limit to continental USA
-county_2014<- subset(county_2014,  STATEFP != "02" )
-county_2014<- subset(county_2014,  STATEFP != "15" )
-county_2014<- subset(county_2014,  STATEFP != "60" )
-county_2014<- subset(county_2014,  STATEFP != "66" )
-county_2014<- subset(county_2014,  STATEFP != "69" )
-county_2014<- subset(county_2014,  STATEFP != "72" )
-county_2014<- subset(county_2014,  STATEFP != "78" )
-county_2014$countyid <-as.numeric(paste0(county_2014$STATEFP, county_2014$COUNTYFP))
-
-# calculate summary statistics from monte carlo
-
-dr.median <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) median(x$DR))))
-colnames(dr.median) <- "DR.median"
-dr.mean <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) mean(x$DR))))
-colnames(dr.mean) <- "DR.mean"
-dr.95.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$DR, 0.95))))
-colnames(dr.95.quantile) <- "DR.95.quantile"
-dr.5.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$DR, 0.05))))
-colnames(dr.5.quantile) <- "DR.5.quantile"
-
-hq.median <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) median(x$HQ))))
-colnames(hq.median) <- "HQ.median"
-hq.mean <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) mean(x$HQ))))
-colnames(hq.mean) <- "HQ.mean"
-hq.95.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$HQ, 0.95))))
-colnames(hq.95.quantile) <- "HQ.95.quantile"
-hq.5.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$HQ, 0.05))))
-colnames(hq.5.quantile) <- "HQ.5.quantile"
-
-ivive.summary.df<- cbind(FIPS, dr.median, dr.mean, dr.95.quantile, dr.5.quantile,
-                         hq.median, hq.mean, hq.95.quantile, hq.5.quantile)
-summary(ivive.summary.df)
-write.csv(ivive.summary.df, "css_ivive_summary_df.csv")
+write.csv(ivive.summary.df, "/Volumes/SHAG/GeoTox/data/httk_IVIVE/httk_ivive_sensitivity_summary_df.csv")
 
 #### DOSE RESPONSE ####
 ivive_county_cyp1a1_up_sp<- left_join(county_2014, ivive.summary.df, by=c("countyid" = "FIPS"), keep=FALSE)
@@ -615,7 +368,7 @@ sensitivity.dr.hq.figure = ggarrange(dr_cyp1a1_up_5q,
                        common.legend = FALSE,
                        legend = "right")
 
-save_plot("sensitivity.css.hq.figure.tif", sensitivity.dr.hq.figure, width = 40, height = 30, dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/httk_IVIVE/sensitivity.css.hq.figure.tif", sensitivity.dr.hq.figure, width = 40, height = 30, dpi = 200)
 
 
 
