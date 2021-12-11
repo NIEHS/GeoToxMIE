@@ -6,7 +6,7 @@ library(tidyverse)
 
 source("/Volumes/messierkp/Projects/AEP-AOP/tcplHillVal.R", echo=FALSE)
 # load data
-css.by.county <- get(load("/Volumes/SHAG/GeoTox/data/httk_IVIVE/css_by_county_20211201.RData"))
+css.by.county <- get(load("/Volumes/SHAG/GeoTox/data/httk_IVIVE/css_by_county_20211209.RData"))
 cyp1a1_up.by.county <- get(load("/Volumes/SHAG/GeoTox/data/CYP1A1_by_county_20211201.RData"))
 uchems <- get(load("/Volumes/SHAG/GeoTox/data/uchems_20211201.RData"))
 inhalation.dose.by.county <- get(load("/Volumes/SHAG/GeoTox/data/inhalation_dose_by_county_20211201.RData"))
@@ -88,9 +88,9 @@ run.dr.fun <- function(x){
   # Add the doses by chemical for each MC.iter
   dose.sum <- log10(rowSums(invitro.conc.by.county[[x]]))
   # Do the additivity based on the  concentration weighting
-  tp.val <- rowMeans(tp.sim * proportion.by.county[[x]])
-  AC50.val <- rowMeans(AC50.sim * proportion.by.county[[x]])
-  slope.val <- rowMeans(slope.sim * proportion.by.county[[x]])
+  tp.val <- rowSums(tp.sim * proportion.by.county[[x]])
+  AC50.val <- rowSums(AC50.sim * proportion.by.county[[x]])
+  slope.val <- rowSums(slope.sim * proportion.by.county[[x]])
   
   # CALCULATE THE DOSE RESPONSE!
   dose.response <- tcplHillVal(dose.sum,tp.val,AC50.val,slope.val)

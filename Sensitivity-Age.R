@@ -1,4 +1,7 @@
 ##################################################################################################
+# Sensitivity analysis - varying age 
+# Written: KME, 12/7/21 
+# Contributions: KPM, 12/9/21
 
 #### Simulatation by county ####
 # external.exposure.by.county
@@ -195,11 +198,13 @@ inhalation.dose.by.county <- lapply(1:length(external.dose.by.county),convert.fu
 uchems <- cyp1a1_up.by.county[[1]]$casrn %>% unique()
 
 ####################################################################################
-load("~/Desktop/geo_ivive/css_by_county_20211129.RData")
+css.by.county <- get(load("/Volumes/SHAG/GeoTox/data/httk_IVIVE/css_by_county_20211209.RData"))
 
 # To hold CSS constant
-css.by.county.mean<- lapply(css.by.county, FUN= function (x) mean(x))
-css.by.county <- lapply(css.by.county.mean, FUN = function (x) replicate(MC.iter, x))
+css.by.age.median<- sapply(css.list, FUN= function (x) median(x))
+css.by.county.test<- sapply(css.by.county, FUN= function (x) mean(x,na.rm = TRUE))
+
+css.by.county.test <- lapply(css.by.county.test, FUN = function (x) replicate(MC.iter, x))
 
 ####################################################################################
 #### MC-ToxGeo-Run-Risk-Measure ####

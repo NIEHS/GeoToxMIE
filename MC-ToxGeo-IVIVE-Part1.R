@@ -33,7 +33,7 @@ css.list <- vector(mode = "list", length = length(in.chems))
 MC.iter <- 1000
 val <- matrix(NA,nrow = MC.iter,ncol = 22)
 
-for (i in 5:length(in.chems)){
+for (i in 1:length(in.chems)){
   
   for (j in 1:nrow(group)){
     
