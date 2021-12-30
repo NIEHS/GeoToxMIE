@@ -28,11 +28,11 @@ tk$variable <-"TK parameters"
 
 #combine df
 sensitivity.df <- rbind(age, obesity, external, conc.resp, all, tk)
-sensitivity.df$variable = with(sensitivity.df, reorder("All", "Age", "Concentration-Response", "External-Concentration",
-                                            "Obesity", "TK parameters"))
-sensitivity.df <- mutate(variable = factor(variable, levels=c("All", "Age", "Concentration-Response", "External Concentration",
-                                          "Obesity", "Plasma Concentration")))
-  
+# sensitivity.df$variable = with(sensitivity.df, reorder("All", "Age", "Concentration-Response", "External-Concentration",
+#                                             "Obesity", "TK parameters"))
+# sensitivity.df <- mutate(variable = factor(variable, levels=c("All", "Age", "Concentration-Response", "External Concentration",
+#                                           "Obesity", "Plasma Concentration")))
+#   
 
 ################################################################################
 # Exploratory data analysis
@@ -92,7 +92,7 @@ sensitivity.conc.resp <- get(load("/Volumes/SHAG/GeoTox/data/httk_IVIVE/sensitiv
 
 sensitivity.CR <- NULL
 for (x in 1:length(external.concentration)){
-  
+  print(x)
   CR <- cbind(external.concentration[[x]]$DR,sensitivity.httk[[x]]$DR,
               sensitivity.obesity[[x]]$DR,sensitivity.age[[x]]$DR,
               sensitivity.conc.resp[[x]]$DR,baseline[[x]]$DR)
@@ -109,7 +109,6 @@ colnames(sensitivity.CR) <- c("External-Concentration","TK-params",
 
 CR.melt <- melt(sensitivity.CR)
 
-sensitivity.HQ <- NULL
 conc.resp.plot <-ggplot(CR.melt, aes(x = value, y = as.factor(Var2), fill = as.factor(Var2))) +
   geom_density_ridges(alpha=0.5) +coord_cartesian(xlim = c(1e-20,10))+
   scale_x_log10(labels = trans_format("log10", math_format(10^.x)))+
@@ -119,11 +118,30 @@ conc.resp.plot <-ggplot(CR.melt, aes(x = value, y = as.factor(Var2), fill = as.f
   ylab("Varying Parameter")
 conc.resp.plot
 
+conc.resp.plot <-ggplot(CR.melt, aes(x = value, fill = as.factor(Var2))) +
+  geom_boxplot() +coord_cartesian(xlim = c(1e-20,10))+
+  scale_x_log10(labels = trans_format("log10", math_format(10^.x)))+
+  scale_fill_viridis_d(option = "C")+
+  theme(legend.position = "none")+
+  xlab("Median Log2 Fold Change mRNA Expression CYP1A1")+
+  ylab("Varying Parameter")
+conc.resp.plot
 
+
+conc.resp.facet <-ggplot(CR.melt, aes(value)) +
+  geom_density()+scale_x_log10()+
+  facet_wrap(~as.factor(Var2),scales = "free")+
+  theme(legend.position = "none")+
+  xlab("Median Log2 Fold Change mRNA Expression CYP1A1")+
+  ylab("Varying Parameter")
+conc.resp.facet
+
+
+sensitivity.HQ <- NULL
 for (x in 1:length(external.concentration)){
   
   print(x)
-  HQ <- cbind(external.concentration[[x]]$HQ,sensitivity.httk[[x]]$HQ,
+  HQ <- cbind(external.concentration[[x]]$HQw,sensitivity.httk[[x]]$HQ,
               sensitivity.obesity[[x]]$HQ,sensitivity.age[[x]]$HQ,
               sensitivity.conc.resp[[x]]$HQ,baseline[[x]]$HQ)
 
@@ -147,3 +165,37 @@ HQ.plot <-ggplot(HQ.melt, aes(x = value, y = as.factor(Var2), fill = as.factor(V
   xlab("Hazard Quotient CYP1A1")+
   ylab("Varying Parameter")
 HQ.plot
+
+
+
+
+###
+
+CR.summary.df <- apply(sensitivity.CR,2,quantile,c(0.025,0.1,0.25,0.5,0.75,0.90,0.975))
+
+CR.summary.melt <- melt(CR.summary.df)
+
+ggplot() + geom_crossbar(data = CR.summary.melt[CR.summary.melt$Var1 == "50%" | CR.summary.melt$Var1 == "25%" | CR.summary.melt$Var1 == "75%",],
+                         aes(x = as.factor(Var2),y = value))
+
+
+
+conc.resp.plot <-ggplot(CR.melt, aes(x = value,y = as.factor(Var2), fill = as.factor(Var2))) +
+  geom_boxplot(outlier.shape = NA) +coord_cartesian(xlim = c(1e-20,10))+
+   scale_x_log10(labels = trans_format("log10", math_format(10^.x)))+
+  scale_fill_viridis_d(option = "C")+
+  theme(legend.position = "none")+
+  xlab("Median Log2 Fold Change mRNA Expression CYP1A1")+
+  ylab("Varying Parameter")
+conc.resp.plot
+
+
+conc.resp.plot <-ggplot(HQ.melt, aes(x = value,y = as.factor(Var2), fill = as.factor(Var2))) +
+  geom_boxplot(outlier.shape = NA) +coord_cartesian(xlim = c(1e-9,100))+
+  scale_x_log10(labels = trans_format("log10", math_format(10^.x)))+
+  scale_fill_viridis_d(option = "C")+
+  theme(legend.position = "none")+
+  xlab("Hazard Quotient of CYP1A1")+
+  ylab("Varying Parameter")
+conc.resp.plot
+
