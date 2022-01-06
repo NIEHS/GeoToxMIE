@@ -110,7 +110,11 @@ colnames(sensitivity.CR) <- c("External-Concentration","TK-params",
 CR.melt <- melt(sensitivity.CR)
 
 conc.resp.plot <-ggplot(CR.melt, aes(x = value, y = as.factor(Var2), fill = as.factor(Var2))) +
-  geom_density_ridges(alpha=0.5) +coord_cartesian(xlim = c(1e-20,10))+
+  stat_density_ridges(bandwidth = 0.5,
+                      geom = "density_ridges_gradient", calc_ecdf = TRUE, 
+                      quantiles = 4, quantile_lines = TRUE
+  )  + 
+  coord_cartesian(xlim = c(1e-20,10))+
   scale_x_log10(labels = trans_format("log10", math_format(10^.x)))+
   scale_fill_viridis_d(option = "C")+
   theme(legend.position = "none")+
