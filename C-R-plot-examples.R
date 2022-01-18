@@ -9,10 +9,20 @@ library(reshape2)
 # We plot the x-axis using a log10 scaling 
 
 tp.mean <- get(load("/Volumes/SHAG/GeoTox/data/tp_mean_example.RData"))
+AC50.mean <- get(load("/Volumes/SHAG/GeoTox/data/AC50_mean_example.RData"))
+slope.mean <- get(load("/Volumes/SHAG/GeoTox/data/slope_mean_example.RData"))
 
-function(x){
+# If we want to include SD somehow in this example
+tp.sd <- get(load("/Volumes/SHAG/GeoTox/data/tp_sd_example.RData"))
+AC50.sd <- get(load("/Volumes/SHAG/GeoTox/data/AC50_sd_example.RData"))
+slope.sd <- get(load("/Volumes/SHAG/GeoTox/data/slope_sd_example.RData"))
+
+myfun <- function(x){
   val <- tcplHillVal(logX,tp.mean[x],AC50.mean[x],slope.mean[x])
-  d <- data.frame("x"=X,"y"=val)
+  # Testing out the inverse function
+  inv.val <- tcplHillConc(val,tp.mean[x],AC50.mean[x],slope.mean[x])
+  
+  d <- data.frame("logX"= logX, "x"=X,"y"=val,"inv.y" = inv.val)
   return(d)
 }
 
