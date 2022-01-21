@@ -108,6 +108,7 @@ county_stack<- subset(county_stack,  STATE != "78" )
 county_cyp1a1_up <- left_join(county_stack, ice_epa_df, by=c("casrn" = "casn"), keep= FALSE)
 #remove rows where NATA does not overlap with TOX21
 #county_cyp1a1_up <- county_cyp1a1_up[!is.na(county_cyp1a1_up$aenm), ]
+#county_cyp1a1_up <- county_cyp1a1_up[!is.na(county_cyp1a1_up$aenm), ]
 
 # Save a working Rdata dataframe
 save(county_cyp1a1_up,file = "/Volumes/SHAG/GeoTox/data/county_cyp1a1_up_20220121.RData")
