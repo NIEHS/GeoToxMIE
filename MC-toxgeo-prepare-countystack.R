@@ -3,13 +3,12 @@
 # By: Kristin Eccles
 # Edits: Kyle P Messier
 # Date: Oct 22nd, 2021
-# Updated, Run, 12/1/2021
+# Updated, Run, 01/12/2022
 # QC by KPM, 12/7/2021
 # Written in R Version 4.0.2
 # Description: 
 ######################################################
-#
-#
+
 # Libraries
 library(ggplot2)
 library(viridis)
@@ -32,27 +31,38 @@ library(httk)
 # Import data
 
 # From server (or local below)
-ice_data <- get(load("/Volumes/SHAG/GeoTox/data/210105_ICE_cHTS_invitrodbv33.Rdata"))
-epa_data<-list.files(path = "/Volumes/SHAG/GeoTox/data/INVITRODB_V3_3_LEVEL5/",
-                     pattern = "*LTEA_200730.csv", 
-                     full.names = T) %>% 
-  map_df(~read_csv(., col_types = cols(.default = "c"))) 
+#ice_data <- get(load("/Volumes/SHAG/GeoTox/data/210105_ICE_cHTS_invitrodbv33.Rdata"))
+# epa_data<-list.files(path = "/Volumes/SHAG/GeoTox/data/INVITRODB_V3_3_LEVEL5/",
+#                      pattern = "*LTEA_200730.csv", 
+#                      full.names = T) %>% 
+#   map_df(~read_csv(., col_types = cols(.default = "c"))) 
+
+#Updated TK parameters
+kdat_ice <- get(load("/Volumes/SHAG/GeoTox/data/220113_kdat_ice.RData"))
+kdat_tcpl <- get(load("/Volumes/SHAG/GeoTox/data/220113_kdat_tcpl_details.RData"))
+
+kdat_join <- left_join(kdat_tcpl, kdat_ice[,c("m4id", "new_ice_hitc")],by="m4id", keep=FALSE)
+
+# limit to CYP1A1
+kdat_ice_cyp<- subset(kdat_join, new_ice_hitc == 1 | new_ice_hitc == 3 )
+kdat_ice_cyp <- subset(kdat_ice_cyp, aenm == "LTEA_HepaRG_CYP1A1_up")
+
+# remove duplicates
+kdat_ice_cyp<-unique(kdat_ice_cyp)
+# rename to match variable names below
+ice_epa_df <- kdat_ice_cyp
+
+#epa_data$m4id <-as.numeric(epa_data$m4id )
+
+# ice_epa_df<- left_join(ice_data, 
+#                        epa_data[c("m4id", "hill_tp", "hill_tp_sd", "hill_ga", 
+#                                   "hill_ga_sd", "hill_gw", "hill_gw_sd","resp_max","logc_min","logc_max")], by= "m4id", keep=FALSE)
+# 
+
+#limit to 
 nata_df<- read.csv("/Volumes/SHAG/GeoTox/data/2014_NATA_CONCS.csv")
 nata_chemicals <- read.csv("/Volumes/SHAG/GeoTox/data/NATA_pollutant_names_casrn.csv")
 county_2014 <-st_read("/Volumes/SHAG/GeoTox/data/cb_2014_us_county_5m/cb_2014_us_county_5m.shp")
-
-
-# TOX21 Data from ICE
-# ice_data <- get(load("210105_ICE_cHTS_invitrodbv33.Rdata"))
-
-
-ice_data <- subset(ice_data, new_hitc == 1)
-
-epa_data$m4id <-as.numeric(epa_data$m4id )
-
-ice_epa_df<- left_join(ice_data, 
-  epa_data[c("m4id", "hill_tp", "hill_tp_sd", "hill_ga", 
-             "hill_ga_sd", "hill_gw", "hill_gw_sd","resp_max","logc_min","logc_max")], by= "m4id", keep=FALSE)
 
 # There were some repeats of reading in data?!
 #simplify names
@@ -95,13 +105,10 @@ county_stack<- subset(county_stack,  STATE != "78" )
 
 ################################################################################
 #### CYP1A1 ####
-# subset tox21 data
-ice_cyp1a1_up <- subset(ice_epa_df, aenm == "LTEA_HepaRG_CYP1A1_up" )
-
-county_cyp1a1_up <- left_join(county_stack, ice_cyp1a1_up, by=c("casrn" = "casn"), keep= FALSE)
-# county_cyp1a1_up<- county_cyp1a1_up[!is.na(county_cyp1a1_up$ACC), ]
-# county_cyp1a1_up<- county_cyp1a1_up[!is.na(county_cyp1a1_up$concentration_mean), ]
+county_cyp1a1_up <- left_join(county_stack, ice_epa_df, by=c("casrn" = "casn"), keep= FALSE)
+#remove rows where NATA does not overlap with TOX21
+county_cyp1a1_up <- county_cyp1a1_up[!is.na(county_cyp1a1_up$aenm), ]
 
 # Save a working Rdata dataframe
-save(county_cyp1a1_up,file = "/Volumes/SHAG/GeoTox/data/county_cyp1a1_up_2021201.RData")
+save(county_cyp1a1_up,file = "/Volumes/SHAG/GeoTox/data/county_cyp1a1_up_20220121.RData")
 
