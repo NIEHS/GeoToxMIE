@@ -9,7 +9,7 @@ library(viridisLite)
 library(ggpubr)
 
 # load data
-load("final_response_by_county.RData")
+load("/Volumes/SHAG/GeoTox/data/final_response_by_county_20211209.RData")
 
 load ("/Volumes/SHAG/GeoTox/data/FIPS_by_county.RData")
 FIPS <- as.data.frame(FIPS)
@@ -38,8 +38,7 @@ county_2014$countyid <-as.numeric(paste0(county_2014$STATEFP, county_2014$COUNTY
 
 ################################################################################################3
 # calculate summary statistics from monte carlo
-summary(final.response.by.county)
-final.response.by.county[[1]]
+
 
 dr.median <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) median(x$DR))))
 colnames(dr.median) <- "DR.median"
@@ -95,7 +94,7 @@ dr_cyp1a1_up_5q <- ggplot(data = ivive_county_cyp1a1_up_sf, aes(fill=DR.5.quanti
 
 #### HAZARD QUOTIENT ####
 
-hg_cyp1a1_up_median <- ggplot(data = ivive_county_cyp1a1_up_sf, aes(fill=HQ.median)) +
+hq_cyp1a1_up_median <- ggplot(data = ivive_county_cyp1a1_up_sf, aes(fill=HQ.median)) +
   geom_sf(lwd = 0)+
   theme_bw()+
   labs(fill="Sum")+
@@ -122,9 +121,12 @@ hq_cyp1a1_up_5q <- ggplot(data = ivive_county_cyp1a1_up_sf, aes(fill=HQ.5.quanti
 ##### Compile Figures ####
 
 #Compile
-dr.hq.figurev=ggarrange(dr_cyp1a1_up_5q, hq_cyp1a1_up_5q,
-                       dr_cyp1a1_up_median, hg_cyp1a1_up_median,
-                       dr_cyp1a1_up_95q, hq_cyp1a1_up_95q,
+dr.hq.figurev=ggarrange(dr_cyp1a1_up_5q, 
+                        hq_cyp1a1_up_5q,
+                       dr_cyp1a1_up_median, 
+                       hg_cyp1a1_up_median,
+                       dr_cyp1a1_up_95q,
+                       hq_cyp1a1_up_95q,
                   labels = c("(A) 5th Percentile ", "(D) 5th Percentile",
                            "(B) Median", "(E) Median",
                              "(C) 95th Percentile", "(F) 95th Percentile"),
@@ -136,17 +138,31 @@ dr.hq.figurev=ggarrange(dr_cyp1a1_up_5q, hq_cyp1a1_up_5q,
                   legend = "right")
 save_plot("dr.hq.figurev.tif", dr.hq.figurev, width = 40, height = 30, dpi = 200)
 
-dr.hq.figureh=ggarrange(dr_cyp1a1_up_5q,dr_cyp1a1_up_median, dr_cyp1a1_up_95q, 
-                       hq_cyp1a1_up_5q, hg_cyp1a1_up_median,hq_cyp1a1_up_95q,
-                       #labels = c("(A) 5th Percentile ", "(D) 5th Percentile",
-                       #           "(B) Median", "(E) Median",
-                       #          "(C) 95th Percentile", "(F) 95th Percentile"),
+dr.hq.figureh1=ggarrange(hq_cyp1a1_up_5q,hq_cyp1a1_up_median, hq_cyp1a1_up_95q, 
                        vjust = 1,
                        hjust = -0.5,
                        align = "hv",
-                       ncol = 3, nrow = 2,
-                       common.legend = TRUE,
+                       ncol = 3, nrow = 1,
+                       common.legend = TRUE, 
                        legend = "right")
+save_plot("hq.figureh.tif", dr.hq.figureh1, width = 60, height = 20, dpi = 200)
+
+dr.hq.figureh2=ggarrange(dr_cyp1a1_up_5q,dr_cyp1a1_up_median, dr_cyp1a1_up_95q, 
+                         vjust = 1,
+                         hjust = -0.5,
+                         align = "hv",
+                         ncol = 3, nrow = 1,
+                         common.legend = TRUE,
+                         legend = "right")
+save_plot("dr.figureh.tif", dr.hq.figureh2, width = 60, height = 20, dpi = 200)
+
+dr.hq.figureh=ggarrange( dr.hq.figureh2, dr.hq.figureh1,
+                         vjust = 1,
+                         hjust = -0.5,
+                         align = "hv",
+                         ncol = 1, nrow = 2,
+                         common.legend = FALSE,
+                         legend = "right")
 
 save_plot("dr.hq.figureh.tif", dr.hq.figureh, width = 60, height = 20, dpi = 200)
 
