@@ -1,3 +1,11 @@
+######################################################
+# By: Kyle Messier
+# Date: Oct 22nd, 2021
+# Edits: Kristin Eccles
+# Updated, Run, 01/24/2022
+# Written in R Version 4.0.2
+######################################################
+
 # load libraries
 library(dplyr)
 library(sf)
@@ -9,7 +17,7 @@ library(viridisLite)
 library(ggpubr)
 
 # load data
-load("/Volumes/SHAG/GeoTox/data/final_response_by_county_20211209.RData")
+load("/Volumes/SHAG/GeoTox/data/final_response_by_county_20220124.RData")
 
 load ("/Volumes/SHAG/GeoTox/data/FIPS_by_county.RData")
 FIPS <- as.data.frame(FIPS)
@@ -37,34 +45,11 @@ county_2014<- subset(county_2014,  STATEFP != "78" )
 county_2014$countyid <-as.numeric(paste0(county_2014$STATEFP, county_2014$COUNTYFP))
 
 ################################################################################################3
-# calculate summary statistics from monte carlo
+# load statistics from monte carlo
+ivive.summary.df <- read.csv("/Volumes/SHAG/GeoTox/data/mc_all_summary_df_20220124.csv")
+summary(ivive.summary.df)
 
-
-dr.median <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) median(x$DR))))
-colnames(dr.median) <- "DR.median"
-dr.mean <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) mean(x$DR))))
-colnames(dr.mean) <- "DR.mean"
-dr.95.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$DR, 0.95))))
-colnames(dr.95.quantile) <- "DR.95.quantile"
-dr.5.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$DR, 0.05))))
-colnames(dr.5.quantile) <- "DR.5.quantile"
-
-hq.median <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) median(x$HQ))))
-colnames(hq.median) <- "HQ.median"
-hq.mean <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) mean(x$HQ))))
-colnames(hq.mean) <- "HQ.mean"
-hq.95.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$HQ, 0.95))))
-colnames(hq.95.quantile) <- "HQ.95.quantile"
-hq.5.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$HQ, 0.05))))
-colnames(hq.5.quantile) <- "HQ.5.quantile"
-
-ivive.summary.df<- cbind(FIPS, dr.median, dr.mean, dr.95.quantile, dr.5.quantile,
-                         hq.median, hq.mean, hq.95.quantile, hq.5.quantile)
-
-write.csv(ivive.summary.df, "mc_ivive_summary_df.csv")
-
-####################################################################################################
-#### DOSE RESPONSE ####
+#make data spatial
 ivive_county_cyp1a1_up_sp<- left_join(county_2014, ivive.summary.df, by=c("countyid" = "FIPS"), keep=FALSE)
 ivive_county_cyp1a1_up_sf <-st_as_sf(ivive_county_cyp1a1_up_sp)
 
@@ -124,7 +109,7 @@ hq_cyp1a1_up_5q <- ggplot(data = ivive_county_cyp1a1_up_sf, aes(fill=HQ.5.quanti
 dr.hq.figurev=ggarrange(dr_cyp1a1_up_5q, 
                         hq_cyp1a1_up_5q,
                        dr_cyp1a1_up_median, 
-                       hg_cyp1a1_up_median,
+                       hq_cyp1a1_up_median,
                        dr_cyp1a1_up_95q,
                        hq_cyp1a1_up_95q,
                   labels = c("(A) 5th Percentile ", "(D) 5th Percentile",
@@ -136,35 +121,9 @@ dr.hq.figurev=ggarrange(dr_cyp1a1_up_5q,
                   ncol = 2, nrow = 3,
                   common.legend = FALSE,
                   legend = "right")
-save_plot("dr.hq.figurev.tif", dr.hq.figurev, width = 40, height = 30, dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/dr_hq_figurev_20220124.tif", dr.hq.figurev, width = 40, height = 30, dpi = 200)
 
-dr.hq.figureh1=ggarrange(hq_cyp1a1_up_5q,hq_cyp1a1_up_median, hq_cyp1a1_up_95q, 
-                       vjust = 1,
-                       hjust = -0.5,
-                       align = "hv",
-                       ncol = 3, nrow = 1,
-                       common.legend = TRUE, 
-                       legend = "right")
-save_plot("hq.figureh.tif", dr.hq.figureh1, width = 60, height = 20, dpi = 200)
 
-dr.hq.figureh2=ggarrange(dr_cyp1a1_up_5q,dr_cyp1a1_up_median, dr_cyp1a1_up_95q, 
-                         vjust = 1,
-                         hjust = -0.5,
-                         align = "hv",
-                         ncol = 3, nrow = 1,
-                         common.legend = TRUE,
-                         legend = "right")
-save_plot("dr.figureh.tif", dr.hq.figureh2, width = 60, height = 20, dpi = 200)
-
-dr.hq.figureh=ggarrange( dr.hq.figureh2, dr.hq.figureh1,
-                         vjust = 1,
-                         hjust = -0.5,
-                         align = "hv",
-                         ncol = 1, nrow = 2,
-                         common.legend = FALSE,
-                         legend = "right")
-
-save_plot("dr.hq.figureh.tif", dr.hq.figureh, width = 60, height = 20, dpi = 200)
 
 
 
