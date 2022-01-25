@@ -6,10 +6,10 @@ library(truncnorm)
 library(tidyverse)
 
 # load in the saved data
-age.by.county <- get(load("/Volumes/SHAG/GeoTox/data/age_by_county_20211118.RData"))
-obesity.by.county <- get(load("/Volumes/SHAG/GeoTox/data/obesity_by_county_20211118.RData"))
+age.by.county <- get(load("/Volumes/SHAG/GeoTox/data/age_by_county_20220124.RData"))
+obesity.by.county <- get(load("/Volumes/SHAG/GeoTox/data/obesity_by_county_20220124.RData"))
 
-css.list <- get(load("/Volumes/SHAG/GeoTox/data/httk_IVIVE/httk_css_pre_simulate_20211209.RData"))
+css.list <- get(load("/Volumes/SHAG/GeoTox/data/httk_IVIVE/httk_css_pre_simulate_20220124.RData"))
 
 
 MC.iter <- 10^3
@@ -130,4 +130,4 @@ for (i in 1:length(age.by.county)){
   
 }
 
-save(css.by.county,file = "/Volumes/SHAG/GeoTox/data/httk_IVIVE/css_by_county_20211209.RData")
+save(css.by.county,file = "/Volumes/SHAG/GeoTox/data/httk_IVIVE/css_by_county_20220124.RData")

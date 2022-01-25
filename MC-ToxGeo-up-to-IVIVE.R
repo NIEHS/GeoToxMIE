@@ -1,9 +1,9 @@
 ######################################################
-# By: Kristin Eccles
+# By: Kyle Messier
 # Date: Oct 22nd, 2021
-# Edits: Kyle P Messier
+# Edits: Kristin Eccles
 # QC, 12/8/21, KPM
-# Updated, Run, 01/12/2022
+# Updated, Run, 01/24/2022
 # Written in R Version 4.0.2
 ######################################################
 # Libraries
@@ -29,7 +29,7 @@ library(truncnorm)
 
 
 # Load the dataframe with county FIPS, Pollutant Concentration, and EPA/ICE IVIVE data
-county_cyp1a1_up <- get(load("/Volumes/SHAG/GeoTox/data/county_cyp1a1_up_20220121.RData"))
+county_cyp1a1_up <- get(load("/Volumes/SHAG/GeoTox/data/county_cyp1a1_up_20220124.RData"))
 
 MC.iter <- 10^3
 
@@ -126,7 +126,7 @@ cyp1a1_up.by.county <- lapply(1:length(cyp1a1_up.by.county),NA.fun)
 
 ##### Simulate exposure concentrations ####
 sim.chem.fun <- function(x){
-  val <- matrix(0,nrow = MC.iter, ncol = 42)
+  val <- matrix(0,nrow = MC.iter, ncol = nrow(cyp1a1_up.by.county[[1]]))
   print(x)
   if (nrow(cyp1a1_up.by.county[[x]])==0){
     
@@ -178,16 +178,16 @@ external.dose.by.county <- lapply(1:length(cyp1a1_up.by.county),sim.chem.fun)
 nchems <- nrow(cyp1a1_up.by.county[[1]])
 convert.fun <- function(x){
   print(x)
-    (external.dose.by.county[[x]]/1000) * replicate(42,IR.by.county[[x]])
+    (external.dose.by.county[[x]]/1000) * replicate(nrow(cyp1a1_up.by.county[[1]]),IR.by.county[[x]])
 }
 
 inhalation.dose.by.county <- lapply(1:length(external.dose.by.county),convert.fun)
 
 uchems <- cyp1a1_up.by.county[[1]]$casrn %>% unique()
 
-save(uchems,file = "/Volumes/SHAG/GeoTox/data/uchems_20211201.RData")
-save(inhalation.dose.by.county,file = "/Volumes/SHAG/GeoTox/data/inhalation_dose_by_county_20220121.RData")
-save(age.by.county,file = "/Volumes/SHAG/GeoTox/data/age_by_county_20220121.RData")
-save(obesity.by.county,file = "/Volumes/SHAG/GeoTox/data/obesity_by_county_20220121.RData")
-save(kidney.by.county,file = "/Volumes/SHAG/GeoTox/data/kidney_by_county_20220121.RData")
-save(cyp1a1_up.by.county,file = "/Volumes/SHAG/GeoTox/data/CYP1A1_by_county_20220121.RData")
+save(uchems,file = "/Volumes/SHAG/GeoTox/data/uchems_20220124.RData")
+save(inhalation.dose.by.county,file = "/Volumes/SHAG/GeoTox/data/inhalation_dose_by_county_20220124.RData")
+save(age.by.county,file = "/Volumes/SHAG/GeoTox/data/age_by_county_20220124.RData")
+save(obesity.by.county,file = "/Volumes/SHAG/GeoTox/data/obesity_by_county_20220124.RData")
+#save(kidney.by.county,file = "/Volumes/SHAG/GeoTox/data/kidney_by_county_20220124.RData")
+save(cyp1a1_up.by.county,file = "/Volumes/SHAG/GeoTox/data/CYP1A1_by_county_20220124.RData")

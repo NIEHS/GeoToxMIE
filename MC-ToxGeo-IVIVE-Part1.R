@@ -1,7 +1,19 @@
+######################################################
+# By: Kyle Messier
+# Date: Oct 22nd, 2021
+# Edits: Kristin Eccles
+# QC, 12/8/21, KPM
+# Updated, Run, 01/24/2022
+# Written in R Version 4.0.2
+######################################################
+
+# Load libraries
+
 library(httk)
 load_sipes2017()
 httk.data <- get_cheminfo(info="all")
 
+# Load data
 # Chemicals in CYP1A1 and NATA
 in.chems <-  c("98-86-2","92-87-5","92-52-4","117-81-7","133-06-2","532-27-4","133-90-4","57-74-9","510-15-6","94-75-7" ,
  "64-67-5","132-64-9","106-46-7","111-44-4","79-44-7","131-11-3","77-78-1","119-90-4","121-14-2","534-52-1", 
@@ -87,7 +99,5 @@ for (i in 1:length(in.chems)){
 }
 
 
-save(css.list,file = "/Volumes/messierkp/Projects/AEP-AOP/httk_css_pre_simulate_20211209.RData")
-  
-save(css.list,file = "/Volumes/SHAG/GeoTox/data/httk_IVIVE/httk_css_pre_simulate_20211209.RData")
+save(css.list,file = "/Volumes/SHAG/GeoTox/data/httk_IVIVE/httk_css_pre_simulate_20220124.RData")
 

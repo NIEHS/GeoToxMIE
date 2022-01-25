@@ -28,9 +28,9 @@ library(ggpubr)
 library(RColorBrewer)
 library(httk)
 
-# Import data
+# Load Data
 
-# From server (or local below)
+# ICE
 #ice_data <- get(load("/Volumes/SHAG/GeoTox/data/210105_ICE_cHTS_invitrodbv33.Rdata"))
 # epa_data<-list.files(path = "/Volumes/SHAG/GeoTox/data/INVITRODB_V3_3_LEVEL5/",
 #                      pattern = "*LTEA_200730.csv", 
@@ -52,21 +52,20 @@ kdat_ice_cyp<-unique(kdat_ice_cyp)
 # rename to match variable names below
 ice_epa_df <- kdat_ice_cyp
 
-#epa_data$m4id <-as.numeric(epa_data$m4id )
+#epa_data$m4id <-as.numeric(epa_data$m4id)
 
 # ice_epa_df<- left_join(ice_data, 
 #                        epa_data[c("m4id", "hill_tp", "hill_tp_sd", "hill_ga", 
 #                                   "hill_ga_sd", "hill_gw", "hill_gw_sd","resp_max","logc_min","logc_max")], by= "m4id", keep=FALSE)
 # 
 
-#limit to 
+#NATA
 nata_df<- read.csv("/Volumes/SHAG/GeoTox/data/2014_NATA_CONCS.csv")
 nata_chemicals <- read.csv("/Volumes/SHAG/GeoTox/data/NATA_pollutant_names_casrn.csv")
 county_2014 <-st_read("/Volumes/SHAG/GeoTox/data/cb_2014_us_county_5m/cb_2014_us_county_5m.shp")
 
 # There were some repeats of reading in data?!
 #simplify names
-
 nata_chemicals$web_name <- str_to_title(nata_chemicals$web_name, locale = "en")
 nata_chemicals$web_name <- str_replace(nata_chemicals$web_name , " \\s*\\([^\\)]+\\)", "")
 
