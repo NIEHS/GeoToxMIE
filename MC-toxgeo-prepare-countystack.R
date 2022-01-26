@@ -52,20 +52,20 @@ in.chems <-  c("98-86-2","92-87-5","92-52-4","117-81-7","133-06-2","532-27-4","1
 ice_epa_df$match <- ice_epa_df$casn %in% in.chems
 ice_epa_df <- subset(ice_epa_df, match == TRUE)
 
-#Updated TK parameters
-kdat_ice <- get(load("/Volumes/SHAG/GeoTox/data/220113_kdat_ice.RData"))
-kdat_tcpl <- get(load("/Volumes/SHAG/GeoTox/data/220113_kdat_tcpl_details.RData"))
-
-kdat_join <- left_join(kdat_tcpl, kdat_ice[,c("m4id", "new_ice_hitc")],by="m4id", keep=FALSE)
-
-# limit to CYP1A1
-kdat_ice_cyp<- subset(kdat_join, new_ice_hitc == 1 | new_ice_hitc == 3 )
-kdat_ice_cyp <- subset(kdat_ice_cyp, aenm == "LTEA_HepaRG_CYP1A1_up")
-
-# remove duplicates
-kdat_ice_cyp<-unique(kdat_ice_cyp)
-# rename to match variable names below
-#ice_epa_df <- kdat_ice_cyp
+# #Updated TK parameters
+# kdat_ice <- get(load("/Volumes/SHAG/GeoTox/data/220113_kdat_ice.RData"))
+# kdat_tcpl <- get(load("/Volumes/SHAG/GeoTox/data/220113_kdat_tcpl_details.RData"))
+# 
+# kdat_join <- left_join(kdat_tcpl, kdat_ice[,c("m4id", "new_ice_hitc")],by="m4id", keep=FALSE)
+# 
+# # limit to CYP1A1
+# kdat_ice_cyp<- subset(kdat_join, new_ice_hitc == 1 | new_ice_hitc == 3 )
+# kdat_ice_cyp <- subset(kdat_ice_cyp, aenm == "LTEA_HepaRG_CYP1A1_up")
+# 
+# # remove duplicates
+# kdat_ice_cyp<-unique(kdat_ice_cyp)
+# # rename to match variable names below
+# #ice_epa_df <- kdat_ice_cyp
 
 
 #NATA

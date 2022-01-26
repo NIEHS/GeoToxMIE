@@ -36,7 +36,7 @@ MC.iter <- 10^3
 source("/Volumes/SHAG/GeoTox/R_functions/MC_pipeline/census.age.sim.R", echo=FALSE)
 source("/Volumes/SHAG/GeoTox/R_functions/MC_pipeline/sim.IR.BW.R", echo=FALSE)
 source("/Volumes/SHAG/GeoTox/R_functions/MC_pipeline/tcplHillVal.R", echo=FALSE)
-source("/Volumes/SHAG/GeoTox/R_functions/MC_pipeline/Css.function.R", echo=FALSE)
+#source("/Volumes/SHAG/GeoTox/R_functions/MC_pipeline/Css.function.R", echo=FALSE)
 
 #### MC Age iterations by county ####
 #Age stratification

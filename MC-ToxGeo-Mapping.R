@@ -40,15 +40,38 @@ county_2014<- subset(county_2014,  STATEFP != "72" )
 county_2014<- subset(county_2014,  STATEFP != "78" )
 county_2014$countyid <-as.numeric(paste0(county_2014$STATEFP, county_2014$COUNTYFP))
 
-################################################################################################3
-# load statistics from monte carlo
-ivive.summary.df <- read.csv("/Volumes/SHAG/GeoTox/data/mc_all_summary_df_20220124.csv")
-summary(ivive.summary.df)
+################################################################################################
+# calculate summary statistics from monte carlo
+
+dr.median <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) median(x$DR, na.rm = TRUE))))
+colnames(dr.median) <- "DR.median"
+dr.mean <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) mean(x$DR, na.rm = TRUE))))
+colnames(dr.mean) <- "DR.mean"
+dr.95.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$DR, 0.95, na.rm = TRUE))))
+colnames(dr.95.quantile) <- "DR.95.quantile"
+dr.5.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$DR, 0.05, na.rm = TRUE))))
+colnames(dr.5.quantile) <- "DR.5.quantile"
+
+hq.median <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) median(x$HQ, na.rm = TRUE))))
+colnames(hq.median) <- "HQ.median"
+hq.mean <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) mean(x$HQ, na.rm = TRUE))))
+colnames(hq.mean) <- "HQ.mean"
+hq.95.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$HQ, 0.95,na.rm = TRUE ))))
+colnames(hq.95.quantile) <- "HQ.95.quantile"
+hq.5.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$HQ, 0.05, na.rm = TRUE))))
+colnames(hq.5.quantile) <- "HQ.5.quantile"
+
+ivive.summary.df<- cbind(FIPS, dr.median, dr.mean, dr.95.quantile, dr.5.quantile,
+                         hq.median, hq.mean, hq.95.quantile, hq.5.quantile)
+
+write.csv(ivive.summary.df, "/Volumes/SHAG/GeoTox/data/mc_all_summary_df_20220124.csv")
 
 #make data spatial
 ivive_county_cyp1a1_up_sp<- left_join(county_2014, ivive.summary.df, by=c("countyid" = "FIPS"), keep=FALSE)
 ivive_county_cyp1a1_up_sf <-st_as_sf(ivive_county_cyp1a1_up_sp)
 
+################################################################################################
+#### Plots ####
 dr_cyp1a1_up_median <- ggplot(data = ivive_county_cyp1a1_up_sf, aes(fill=DR.median)) +
   geom_sf(lwd = 0)+
   theme_bw()+
@@ -99,8 +122,6 @@ hq_cyp1a1_up_5q <- ggplot(data = ivive_county_cyp1a1_up_sf, aes(fill=HQ.5.quanti
   geom_sf(data = states, fill = NA, size=0.15)+
   theme(text = element_text(size = 14)) 
 
-##### Compile Figures ####
-
 #Compile
 dr.hq.figurev=ggarrange(dr_cyp1a1_up_5q, 
                         hq_cyp1a1_up_5q,
@@ -118,6 +139,8 @@ dr.hq.figurev=ggarrange(dr_cyp1a1_up_5q,
                   common.legend = FALSE,
                   legend = "right")
 save_plot("/Volumes/SHAG/GeoTox/data/plots/dr_hq_figurev_20220126.tif", dr.hq.figurev, width = 40, height = 30, dpi = 200)
+
+
 
 
 
