@@ -118,7 +118,7 @@ DR <- sapply(1:length(final.response.by.county),convert.fun)
 DR.melt <- melt(DR)
 
 ggplot(DR.melt[1:10^5,],aes(value,color = as.factor(Var2)))+geom_density()+
-  theme(legend.position = "none")+scale_color_viridis_d()
+  theme(legend.position = "none")+scale_color_viridis_d()+scale_x_log10()
 
 convert.fun <- function(x){
   DR <- final.response.by.county[[x]]$HQ
