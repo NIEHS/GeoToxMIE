@@ -21,10 +21,6 @@ load("/Volumes/SHAG/GeoTox/data/final_response_by_county_20220124.RData")
 
 load ("/Volumes/SHAG/GeoTox/data/FIPS_by_county.RData")
 FIPS <- as.data.frame(FIPS)
-
-#places data
-
-places.df <- read.csv("/Volumes/SHAG/GeoTox/data/PLACES__County_Data__GIS_Friendly_Format___2020_release.csv")
   
 # Spatial Data
 # state
@@ -121,7 +117,7 @@ dr.hq.figurev=ggarrange(dr_cyp1a1_up_5q,
                   ncol = 2, nrow = 3,
                   common.legend = FALSE,
                   legend = "right")
-save_plot("/Volumes/SHAG/GeoTox/data/plots/dr_hq_figurev_20220124.tif", dr.hq.figurev, width = 40, height = 30, dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/dr_hq_figurev_20220126.tif", dr.hq.figurev, width = 40, height = 30, dpi = 200)
 
 
 

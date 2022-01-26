@@ -115,22 +115,22 @@ final.response.by.county[[1]]
 # calculate summary statistics from monte carlo
 summary(unlist(final.response.by.county))
 
-dr.median <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) median(x$DR))))
+dr.median <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) median(x$DR, na.rm =TRUE))))
 colnames(dr.median) <- "DR.median"
-dr.mean <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) mean(x$DR))))
+dr.mean <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) mean(x$DR,na.rm =TRUE))))
 colnames(dr.mean) <- "DR.mean"
-dr.95.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$DR, 0.95))))
+dr.95.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$DR,na.rm =TRUE))))
 colnames(dr.95.quantile) <- "DR.95.quantile"
-dr.5.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$DR, 0.05))))
+dr.5.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$DR, 0.05,na.rm =TRUE))))
 colnames(dr.5.quantile) <- "DR.5.quantile"
 
-hq.median <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) median(x$HQ))))
+hq.median <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) median(x$HQ,na.rm =TRUE))))
 colnames(hq.median) <- "HQ.median"
-hq.mean <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) mean(x$HQ))))
+hq.mean <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) mean(x$HQ,na.rm =TRUE))))
 colnames(hq.mean) <- "HQ.mean"
-hq.95.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$HQ, 0.95))))
+hq.95.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$HQ, 0.95, na.rm =TRUE))))
 colnames(hq.95.quantile) <- "HQ.95.quantile"
-hq.5.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$HQ, 0.05))))
+hq.5.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$HQ, 0.05,na.rm =TRUE))))
 colnames(hq.5.quantile) <- "HQ.5.quantile"
 
 load ("/Volumes/SHAG/GeoTox/data/FIPS_by_county.RData")
