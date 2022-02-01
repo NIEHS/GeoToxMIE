@@ -1,9 +1,9 @@
 ######################################################
-# 
-# By: Kristin Eccles
+# By: Kyle Messier
 # Date: Oct 22nd, 2021
-# Edits: Kyle P Messier
+# Edits: Kristin Eccles
 # QC, 12/8/21, KPM
+# Updated, Run, 01/24/2022
 # Written in R Version 4.0.2
 ######################################################
 # Libraries
@@ -29,19 +29,18 @@ library(truncnorm)
 
 
 # Load the dataframe with county FIPS, Pollutant Concentration, and EPA/ICE IVIVE data
-county_cyp1a1_up <- get(load("/Volumes/SHAG/GeoTox/data/county_cyp1a1_up_20211109.RData"))
-
+county_cyp1a1_up <- get(load("/Volumes/SHAG/GeoTox/data/county_cyp1a1_up_20220124.RData"))
 
 MC.iter <- 10^3
 
-source("/Volumes/messierkp/Projects/AEP-AOP/census.age.sim.R", echo=FALSE)
-source("/Volumes/messierkp/Projects/AEP-AOP/sim.IR.BW.R", echo=FALSE)
-source("/Volumes/messierkp/Projects/AEP-AOP/tcplHillVal.R", echo=FALSE)
-source("/Volumes/messierkp/Projects/AEP-AOP/Css.function.R", echo=FALSE)
-#### MC Age iterations by county ####
-# : Age stratification
+source("/Volumes/SHAG/GeoTox/R_functions/MC_pipeline/census.age.sim.R", echo=FALSE)
+source("/Volumes/SHAG/GeoTox/R_functions/MC_pipeline/sim.IR.BW.R", echo=FALSE)
+source("/Volumes/SHAG/GeoTox/R_functions/MC_pipeline/tcplHillVal.R", echo=FALSE)
+#source("/Volumes/SHAG/GeoTox/R_functions/MC_pipeline/Css.function.R", echo=FALSE)
 
-age.data <- read.csv("/Volumes/messierkp/Projects/AEP-AOP/cc-est2019-alldata.csv")
+#### MC Age iterations by county ####
+#Age stratification
+age.data <- read.csv("/Volumes/SHAG/GeoTox/data/cc-est2019-alldata.csv")
 age.2014 <- subset(age.data, YEAR == 7) # 7/1/2014 Census population
 
 # Create the county fips
@@ -61,7 +60,6 @@ census.age.overlap <- census.age[idx.FIPS,]
 age.by.county <- census.age.sim(MC.iter,census.age.overlap)
 
 
-
 #### Inhalation Rate per body weight-by age #####
 IR.by.county <- sim.IR.BW(MC.iter,age.by.county)
 
@@ -70,7 +68,6 @@ IR.by.county <- sim.IR.BW(MC.iter,age.by.county)
 
 # Read in the Places data from the SHAG shared drive
 places <- read.csv("/Volumes/SHAG/GeoTox/data/PLACES__County_Data__GIS_Friendly_Format___2020_release.csv")
-
 
 # Calculate the standard deviation from the confidence internals
 kidney.ci <- str_extract_all(places$KIDNEY_Crude95CI,pattern = "\\d+\\.\\d+") %>%  sapply(as.numeric) %>% t()
@@ -93,9 +90,6 @@ idx.places <- places$CountyFIPS %in% unique(county_cyp1a1_up$FIPS)
 
 places <- places[idx.places,]
 
-
-
-
 # Simulate the Obesity data by county
 obesity.binom.p <- lapply(1:length(places$OBESITY_CrudePrev),
                          function(x)rnorm(MC.iter,places$OBESITY_CrudePrev,places$OBESITY_SD)) 
@@ -117,8 +111,8 @@ obesity.by.county <- lapply(1:length(obesity.by.county),function(x){
 )
 
 
-
 #### Convert the cyp1a1 data to a list by county ####
+#county_cyp1a1_up$concentration_sd[is.na(county_cyp1a1_up$concentration_sd)] <- 0
 cyp1a1_up.by.county <- split(county_cyp1a1_up,as.factor(county_cyp1a1_up$FIPS))
 
 # Remove the chemicals that are not in the CYP1A1 AOP
@@ -129,9 +123,10 @@ NA.fun <- function(x){
 }
 cyp1a1_up.by.county <- lapply(1:length(cyp1a1_up.by.county),NA.fun)
 
+
 ##### Simulate exposure concentrations ####
 sim.chem.fun <- function(x){
-  val <- matrix(0,nrow = MC.iter, ncol = 42)
+  val <- matrix(0,nrow = MC.iter, ncol = nrow(cyp1a1_up.by.county[[1]]))
   print(x)
   if (nrow(cyp1a1_up.by.county[[x]])==0){
     
@@ -153,8 +148,6 @@ sim.chem.fun <- function(x){
                             sd = sd.i)
       }
       
-
-      
       # sim.i[sim.i == "NaN"] <- 0
       val[,i] <- sim.i
 
@@ -164,7 +157,6 @@ sim.chem.fun <- function(x){
   # val <- val  * replicate(42,IR.by.county[[x]])
   return(val)
 }
-
 
 # external.exposure.by.county <- lapply(1:length(cyp1a1_up.by.county),sim.chem.fun)
 external.dose.by.county <- lapply(1:length(cyp1a1_up.by.county),sim.chem.fun)
@@ -180,27 +172,22 @@ external.dose.by.county <- lapply(1:length(cyp1a1_up.by.county),sim.chem.fun)
 # cyp1a1_up.by.county
 
 
-
-
-
 #### air concentration from ug/m3 to mg/m3 then ####
 # inhalation dose - multiply the air concentration by the inhalation rate per body weight 
-
-
 
 nchems <- nrow(cyp1a1_up.by.county[[1]])
 convert.fun <- function(x){
   print(x)
-    (external.dose.by.county[[x]]/1000) * replicate(42,IR.by.county[[x]])
+    (external.dose.by.county[[x]]/1000) * replicate(nrow(cyp1a1_up.by.county[[1]]),IR.by.county[[x]])
 }
 
 inhalation.dose.by.county <- lapply(1:length(external.dose.by.county),convert.fun)
 
 uchems <- cyp1a1_up.by.county[[1]]$casrn %>% unique()
 
-save(uchems,file = "/Volumes/SHAG/GeoTox/data/uchems_20211201.RData")
-save(inhalation.dose.by.county,file = "/Volumes/SHAG/GeoTox/data/inhalation_dose_by_county_20211201.RData")
-save(age.by.county,file = "/Volumes/SHAG/GeoTox/data/age_by_county_20211201.RData")
-save(obesity.by.county,file = "/Volumes/SHAG/GeoTox/data/obesity_by_county_20211201.RData")
-save(kidney.by.county,file = "/Volumes/SHAG/GeoTox/data/kidney_by_county_20211201.RData")
-save(cyp1a1_up.by.county,file = "/Volumes/SHAG/GeoTox/data/CYP1A1_by_county_20211201.RData")
+save(uchems,file = "/Volumes/SHAG/GeoTox/data/uchems_20220124.RData")
+save(inhalation.dose.by.county,file = "/Volumes/SHAG/GeoTox/data/inhalation_dose_by_county_20220124.RData")
+save(age.by.county,file = "/Volumes/SHAG/GeoTox/data/age_by_county_20220124.RData")
+save(obesity.by.county,file = "/Volumes/SHAG/GeoTox/data/obesity_by_county_20220124.RData")
+#save(kidney.by.county,file = "/Volumes/SHAG/GeoTox/data/kidney_by_county_20220124.RData")
+save(cyp1a1_up.by.county,file = "/Volumes/SHAG/GeoTox/data/CYP1A1_by_county_20220124.RData")

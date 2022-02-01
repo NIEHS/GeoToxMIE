@@ -1,3 +1,11 @@
+######################################################
+# By: Kyle Messier
+# Date: Oct 22nd, 2021
+# Edits: Kristin Eccles
+# Updated, Run, 01/24/2022
+# Written in R Version 4.0.2
+######################################################
+
 # load libraries
 library(dplyr)
 library(sf)
@@ -9,14 +17,10 @@ library(viridisLite)
 library(ggpubr)
 
 # load data
-load("final_response_by_county.RData")
+load("/Volumes/SHAG/GeoTox/data/final_response_by_county_20220124.RData")
 
 load ("/Volumes/SHAG/GeoTox/data/FIPS_by_county.RData")
 FIPS <- as.data.frame(FIPS)
-
-#places data
-
-places.df <- read.csv("/Volumes/SHAG/GeoTox/data/PLACES__County_Data__GIS_Friendly_Format___2020_release.csv")
   
 # Spatial Data
 # state
@@ -36,39 +40,38 @@ county_2014<- subset(county_2014,  STATEFP != "72" )
 county_2014<- subset(county_2014,  STATEFP != "78" )
 county_2014$countyid <-as.numeric(paste0(county_2014$STATEFP, county_2014$COUNTYFP))
 
-################################################################################################3
+################################################################################################
 # calculate summary statistics from monte carlo
-summary(final.response.by.county)
-final.response.by.county[[1]]
 
-dr.median <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) median(x$DR))))
+dr.median <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) median(x$DR, na.rm = TRUE))))
 colnames(dr.median) <- "DR.median"
-dr.mean <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) mean(x$DR))))
+dr.mean <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) mean(x$DR, na.rm = TRUE))))
 colnames(dr.mean) <- "DR.mean"
-dr.95.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$DR, 0.95))))
+dr.95.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$DR, 0.95, na.rm = TRUE))))
 colnames(dr.95.quantile) <- "DR.95.quantile"
-dr.5.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$DR, 0.05))))
+dr.5.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$DR, 0.05, na.rm = TRUE))))
 colnames(dr.5.quantile) <- "DR.5.quantile"
 
-hq.median <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) median(x$HQ))))
+hq.median <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) median(x$HQ, na.rm = TRUE))))
 colnames(hq.median) <- "HQ.median"
-hq.mean <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) mean(x$HQ))))
+hq.mean <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) mean(x$HQ, na.rm = TRUE))))
 colnames(hq.mean) <- "HQ.mean"
-hq.95.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$HQ, 0.95))))
+hq.95.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$HQ, 0.95,na.rm = TRUE ))))
 colnames(hq.95.quantile) <- "HQ.95.quantile"
-hq.5.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$HQ, 0.05))))
+hq.5.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$HQ, 0.05, na.rm = TRUE))))
 colnames(hq.5.quantile) <- "HQ.5.quantile"
 
 ivive.summary.df<- cbind(FIPS, dr.median, dr.mean, dr.95.quantile, dr.5.quantile,
                          hq.median, hq.mean, hq.95.quantile, hq.5.quantile)
 
-write.csv(ivive.summary.df, "mc_ivive_summary_df.csv")
+write.csv(ivive.summary.df, "/Volumes/SHAG/GeoTox/data/mc_all_summary_df_20220124.csv")
 
-####################################################################################################
-#### DOSE RESPONSE ####
+#make data spatial
 ivive_county_cyp1a1_up_sp<- left_join(county_2014, ivive.summary.df, by=c("countyid" = "FIPS"), keep=FALSE)
 ivive_county_cyp1a1_up_sf <-st_as_sf(ivive_county_cyp1a1_up_sp)
 
+################################################################################################
+#### Plots ####
 dr_cyp1a1_up_median <- ggplot(data = ivive_county_cyp1a1_up_sf, aes(fill=DR.median)) +
   geom_sf(lwd = 0)+
   theme_bw()+
@@ -95,7 +98,7 @@ dr_cyp1a1_up_5q <- ggplot(data = ivive_county_cyp1a1_up_sf, aes(fill=DR.5.quanti
 
 #### HAZARD QUOTIENT ####
 
-hg_cyp1a1_up_median <- ggplot(data = ivive_county_cyp1a1_up_sf, aes(fill=HQ.median)) +
+hq_cyp1a1_up_median <- ggplot(data = ivive_county_cyp1a1_up_sf, aes(fill=HQ.median)) +
   geom_sf(lwd = 0)+
   theme_bw()+
   labs(fill="Sum")+
@@ -119,12 +122,13 @@ hq_cyp1a1_up_5q <- ggplot(data = ivive_county_cyp1a1_up_sf, aes(fill=HQ.5.quanti
   geom_sf(data = states, fill = NA, size=0.15)+
   theme(text = element_text(size = 14)) 
 
-##### Compile Figures ####
-
 #Compile
-dr.hq.figurev=ggarrange(dr_cyp1a1_up_5q, hq_cyp1a1_up_5q,
-                       dr_cyp1a1_up_median, hg_cyp1a1_up_median,
-                       dr_cyp1a1_up_95q, hq_cyp1a1_up_95q,
+dr.hq.figurev=ggarrange(dr_cyp1a1_up_5q, 
+                        hq_cyp1a1_up_5q,
+                       dr_cyp1a1_up_median, 
+                       hq_cyp1a1_up_median,
+                       dr_cyp1a1_up_95q,
+                       hq_cyp1a1_up_95q,
                   labels = c("(A) 5th Percentile ", "(D) 5th Percentile",
                            "(B) Median", "(E) Median",
                              "(C) 95th Percentile", "(F) 95th Percentile"),
@@ -134,21 +138,11 @@ dr.hq.figurev=ggarrange(dr_cyp1a1_up_5q, hq_cyp1a1_up_5q,
                   ncol = 2, nrow = 3,
                   common.legend = FALSE,
                   legend = "right")
-save_plot("dr.hq.figurev.tif", dr.hq.figurev, width = 40, height = 30, dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/dr_hq_figurev_20220126.tif", dr.hq.figurev, width = 40, height = 30, dpi = 200)
 
-dr.hq.figureh=ggarrange(dr_cyp1a1_up_5q,dr_cyp1a1_up_median, dr_cyp1a1_up_95q, 
-                       hq_cyp1a1_up_5q, hg_cyp1a1_up_median,hq_cyp1a1_up_95q,
-                       #labels = c("(A) 5th Percentile ", "(D) 5th Percentile",
-                       #           "(B) Median", "(E) Median",
-                       #          "(C) 95th Percentile", "(F) 95th Percentile"),
-                       vjust = 1,
-                       hjust = -0.5,
-                       align = "hv",
-                       ncol = 3, nrow = 2,
-                       common.legend = TRUE,
-                       legend = "right")
 
-save_plot("dr.hq.figureh.tif", dr.hq.figureh, width = 60, height = 20, dpi = 200)
+
+
 
 
 

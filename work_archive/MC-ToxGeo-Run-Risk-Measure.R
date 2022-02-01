@@ -1,15 +1,24 @@
+######################################################
+# By: Kyle Messier
+# Date: Oct 22nd, 2021
+# Edits: Kristin Eccles
+# Updated, Run, 01/24/2022
+# Written in R Version 4.0.2
+######################################################
 
-
+# load libraries
 library(httk)
 library(truncnorm)
 library(tidyverse)
 
-source("/Volumes/messierkp/Projects/AEP-AOP/tcplHillVal.R", echo=FALSE)
+#load code 
+source("tcplHillVal.R", echo=FALSE)
+
 # load data 
-css.by.county <- get(load("/Volumes/SHAG/GeoTox/data/httk_IVIVE/css_by_county_20211209.RData"))
-cyp1a1_up.by.county <- get(load("/Volumes/SHAG/GeoTox/data/CYP1A1_by_county_20211201.RData"))
-uchems <- get(load("/Volumes/SHAG/GeoTox/data/uchems_20211201.RData"))
-inhalation.dose.by.county <- get(load("/Volumes/SHAG/GeoTox/data/inhalation_dose_by_county_20211201.RData"))
+css.by.county <- get(load("/Volumes/SHAG/GeoTox/data/archived_outputs/css_by_county_20220124.RData"))
+cyp1a1_up.by.county <- get(load("/Volumes/SHAG/GeoTox/data/CYP1A1_by_county_20220124.RData"))
+uchems <- get(load("/Volumes/SHAG/GeoTox/data/uchems_20220124.RData"))
+inhalation.dose.by.county <- get(load("/Volumes/SHAG/GeoTox/data/inhalation_dose_by_county_20220124.RData"))
 
 # chemical list
 in.chems <-  c("98-86-2","92-87-5","92-52-4","117-81-7","133-06-2","532-27-4","133-90-4","57-74-9","510-15-6","94-75-7" ,
@@ -19,7 +28,9 @@ in.chems <-  c("98-86-2","92-87-5","92-52-4","117-81-7","133-06-2","532-27-4","1
                "95-95-4","1582-09-8")
 
 idx.chems <- uchems %in% in.chems
+
 MC.iter <- 10^3
+
 # drop the chemical column from the inhalation dose and cyp1a1 by county
 for (i in 1:length(inhalation.dose.by.county)){
   inhalation.dose.by.county[[i]] <- inhalation.dose.by.county[[i]][,idx.chems]
@@ -36,15 +47,6 @@ invitro.fun <- function(x){
 invitro.conc.by.county <- lapply(1:length(inhalation.dose.by.county),invitro.fun)
 
 # Proportion of each chemical by county
-
-# proportion.fun <- function(x){
-#   
-#   proportion <- cyp1a1_up.by.county[[x]]$concentration_mean / sum(cyp1a1_up.by.county[[x]]$concentration_mean)
-#   df  <- cbind(cyp1a1_up.by.county[[x]],"Propoprtion" = proportion)
-#   return(df)
-# }
-# 
-# cyp1a1_up.by.county <- lapply(1:length(cyp1a1_up.by.county),proportion.fun)
 
 proportion.fun <- function(x){
   # Get each MC iterations invtro dose sum across all chemicals
@@ -104,59 +106,22 @@ run.dr.fun <- function(x){
 # This should be a list by county, with MC.iter elements in each list entry
 final.response.by.county <- lapply(1:length(cyp1a1_up.by.county),run.dr.fun)
 
-
-save(final.response.by.county,file = "/Volumes/SHAG/GeoTox/data/final_response_by_county_20211209.RData")
-
-
-## Summary Stats
-
-################################################################################################3
-# calculate summary statistics from monte carlo
-summary(final.response.by.county)
-
-dr.median <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) median(x$DR))))
-colnames(dr.median) <- "DR.median"
-dr.mean <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) mean(x$DR))))
-colnames(dr.mean) <- "DR.mean"
-dr.95.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$DR, 0.95))))
-colnames(dr.95.quantile) <- "DR.95.quantile"
-dr.5.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$DR, 0.05))))
-colnames(dr.5.quantile) <- "DR.5.quantile"
-
-hq.median <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) median(x$HQ))))
-colnames(hq.median) <- "HQ.median"
-hq.mean <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) mean(x$HQ))))
-colnames(hq.mean) <- "HQ.mean"
-hq.95.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$HQ, 0.95))))
-colnames(hq.95.quantile) <- "HQ.95.quantile"
-hq.5.quantile <- as.data.frame(unlist(lapply(final.response.by.county, FUN = function(x) quantile(x$HQ, 0.05))))
-colnames(hq.5.quantile) <- "HQ.5.quantile"
-
-load ("/Volumes/SHAG/GeoTox/data/FIPS_by_county.RData")
-FIPS <- as.data.frame(FIPS)
-
-ivive.summary.df<- cbind(FIPS, dr.median, dr.mean, dr.95.quantile, dr.5.quantile,
-                         hq.median, hq.mean, hq.95.quantile, hq.5.quantile)
-
-write.csv(ivive.summary.df, "/Volumes/SHAG/GeoTox/data/httk_IVIVE/mc_all_summary_df.csv")
+save(final.response.by.county,file = "/Volumes/SHAG/GeoTox/data/final_response_by_county_20220124.RData")
 
 
-# Some test plotting
+# Plot the responses
 convert.fun <- function(x){
   DR <- final.response.by.county[[x]]$DR
-  
 }
 
 DR <- sapply(1:length(final.response.by.county),convert.fun)
 DR.melt <- melt(DR)
 
 ggplot(DR.melt[1:10^5,],aes(value,color = as.factor(Var2)))+geom_density()+
-  theme(legend.position = "none")+scale_color_viridis_d()
-
+  theme(legend.position = "none")+scale_color_viridis_d()+scale_x_log10()
 
 convert.fun <- function(x){
   DR <- final.response.by.county[[x]]$HQ
-  
 }
 
 HQ <- sapply(1:length(final.response.by.county),convert.fun)
@@ -164,5 +129,6 @@ HQ.melt <- melt(HQ)
 
 ggplot(HQ.melt[1:100000,],aes(value,color = as.factor(Var2)))+geom_density()+
   theme(legend.position = "none")+scale_color_viridis_d()+scale_x_log10()
+
 
 
