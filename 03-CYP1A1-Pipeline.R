@@ -3,9 +3,12 @@
 # Date: Oct 22nd, 2021
 # Edits: Kristin Eccles
 # QC, 12/8/21, KPM
-# Updated, Run, 01/24/2022
+# Updated, Run, 01/24/2022, 02/01/2022
 # Written in R Version 4.0.2
 ######################################################
+# Third script in the main CYCP1A1 analysis pipeline
+# This script precalculates steady states blood plasma concentrations based
+# a groups by age and obesity
 
 # Load libraries
 
@@ -99,5 +102,5 @@ for (i in 1:length(in.chems)){
 }
 
 
-save(css.list,file = "/Volumes/SHAG/GeoTox/data/httk_IVIVE/httk_css_pre_simulate_20220124.RData")
+save(css.list,file = "/Volumes/SHAG/GeoTox/data/httk_IVIVE/httk_css_pre_simulate_20220201.RData")
 
