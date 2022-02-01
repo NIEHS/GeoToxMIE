@@ -1,0 +1,12 @@
+# gitignore file for GeoToxMIE
+
+# ignore all logs
+*.log
+
+# ignore image files
+*.png
+*.jpeg
+*.jpg
+
+#DS_Store file
+*.DS_Store
