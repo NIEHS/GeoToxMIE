@@ -112,6 +112,11 @@ obesity.by.county <- lapply(1:length(obesity.by.county),function(x){
 )
 
 
+#### Convert the cyp1a1 data to a list by county ####
+#county_cyp1a1_up$concentration_sd[is.na(county_cyp1a1_up$concentration_sd)] <- 0
+cyp1a1_up.by.county <- split(county_cyp1a1_up,as.factor(county_cyp1a1_up$FIPS))
+
+
 ##### Simulate exposure concentrations ####
 sim.chem.fun <- function(x){
   val <- matrix(0,nrow = MC.iter, ncol = nrow(cyp1a1_up.by.county[[1]]))
