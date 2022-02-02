@@ -102,5 +102,5 @@ for (i in 1:length(in.chems)){
 }
 
 
-save(css.list,file = "/Volumes/SHAG/GeoTox/data/httk_IVIVE/httk_css_pre_simulate_20220201.RData")
+save(css.list,file = "/Volumes/SHAG/GeoTox/data/httk_css_pre_simulate_20220201.RData")
 
