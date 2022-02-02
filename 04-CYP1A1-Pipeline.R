@@ -1,3 +1,12 @@
+######################################################
+# By: Kyle Messier, Kristin Eccles
+# Date: Feb 1, 2022
+# Written in R Version 4.0.2
+######################################################
+# Foruth script in the main CYCP1A1 analysis pipeline
+# This script takes the precalculated css values and does
+# random sampling by county to produce a valid monte carlo iteration
+# of Css by county
 
 
 
@@ -6,10 +15,10 @@ library(truncnorm)
 library(tidyverse)
 
 # load in the saved data
-age.by.county <- get(load("/Volumes/SHAG/GeoTox/data/age_by_county_20220124.RData"))
-obesity.by.county <- get(load("/Volumes/SHAG/GeoTox/data/obesity_by_county_20220124.RData"))
+age.by.county <- get(load("/Volumes/SHAG/GeoTox/data/age_by_county_20220201.RData"))
+obesity.by.county <- get(load("/Volumes/SHAG/GeoTox/data/obesity_by_county_20220201.RData"))
 
-css.list <- get(load("/Volumes/SHAG/GeoTox/data/httk_css_pre_simulate_20220124.RData"))
+css.list <- get(load("/Volumes/SHAG/GeoTox/data/httk_css_pre_simulate_20220201.RData"))
 
 
 MC.iter <- 10^3
@@ -130,4 +139,4 @@ for (i in 1:length(age.by.county)){
   
 }
 
-save(css.by.county,file = "/Volumes/SHAG/GeoTox/data/css_by_county_20220124.RData")
+save(css.by.county,file = "/Volumes/SHAG/GeoTox/data/css_by_county_20220201.RData")
