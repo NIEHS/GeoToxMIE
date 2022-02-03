@@ -3,7 +3,7 @@
 # Date: Feb 1, 2022
 # Written in R Version 4.0.2
 ######################################################
-# Foruth script in the main CYCP1A1 analysis pipeline
+# Fourth script in the main CYCP1A1 analysis pipeline
 # This script takes the precalculated css values and does
 # random sampling by county to produce a valid monte carlo iteration
 # of Css by county
