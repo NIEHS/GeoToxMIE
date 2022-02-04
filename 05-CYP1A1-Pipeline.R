@@ -6,7 +6,8 @@
 # Written in R Version 4.0.2
 ######################################################
 # Fifth script in the main CYCP1A1 analysis pipeline
-# This script calculates the hazard quotient and GCA efficacy by county
+# This script calculates the hazard quotient and  efficacy 
+# under CA and IA assumptions by county
 
 # load libraries
 library(httk)
@@ -29,11 +30,21 @@ source(paste0(local.path.functions,"ECmix-obj.R"),echo = FALSE)
 css.by.county <- get(load("/Volumes/SHAG/GeoTox/data/css_by_county_20220201.RData"))
 cyp1a1_up.by.county <- get(load("/Volumes/SHAG/GeoTox/data/CYP1A1_by_county_20220201.RData"))
 inhalation.dose.by.county <- get(load("/Volumes/SHAG/GeoTox/data/inhalation_dose_by_county_20220201.RData"))
+hill2.fit <- get(load("/Volumes/SHAG/GeoTox/data/Hill_2param_model_fit.RData"))
 
 
 MC.iter <- 10^3
 
-
+# Fix a few NA's from Css
+for (i in 1:length(css.by.county)){
+  for (j in 1:41){
+    idx <- is.na(css.by.county[[i]][,j])
+    if (sum(idx)>0){
+      css.mean <- mean(css.by.county[[i]][!idx,j])
+      css.by.county[[i]][idx,j] <- css.mean
+    }
+  }
+}
 
 # Calculate the in-vitro dose using the Css
 invitro.fun <- function(x){
@@ -43,6 +54,8 @@ invitro.fun <- function(x){
 }
 
 invitro.conc.by.county <- lapply(1:length(inhalation.dose.by.county),invitro.fun)
+
+
 
 
 run.dr.fun <- function(x){
@@ -74,7 +87,7 @@ run.dr.fun <- function(x){
   Ci <- invitro.conc.by.county[[x]]
 
   
-  GCA.eff <- IA.eff <- GCA.HQ.10 <- GCA.HQ.50 <- IA.HQ.10 <- IA.HQ.50 <- rep(NA,MC.iter)
+  GCA.eff <- IA.eff <- GCA.HQ.10 <-IA.HQ.10 <- rep(NA,MC.iter)
   for (iter in 1:MC.iter){
 
     Cij <- Ci[iter,]
@@ -88,64 +101,56 @@ run.dr.fun <- function(x){
     GCA.eff[iter] <- mixture.result$minimum
     
     IA.eff[iter] <- IA.pred(Cij,tp.ij,AC50.ij)
+
+
     
-    
-    # Estimate the maximal response level of the mixture
-    max.result <- optimize(f = GCA.obj, interval = mixture.response.interval,
-                               Ci = rep(10^3,length(tp.ij)),
-                               tp = tp.ij,
-                               AC50 = AC50.ij)
-    
-    max.response <- max.result$minimum
-    
-    E50 <- max.response * 0.5
-    E10 <- max.response * 0.1
  
-    # Solve for AC50 and AC10
-      EC50.result <- optimize(f = ECx.obj, interval = c(0,1000),
-                              E = E50,
-                              Ci = Cij,
-                              tp = tp.ij,
-                              AC50 = AC50.ij)
-      
-      EC50.GCA<- EC50.result$minimum
-
-
     
-      EC10.result <- optimize(f = ECx.obj, interval = c(0,1000),
+# Estimate the maximal response level of the mixture
+  max.result <- optimize(f = GCA.obj, interval = mixture.response.interval,
+                         Ci = Cij * 10^14,
+                         tp = tp.ij,
+                         AC50 = AC50.ij)
+  
+  max.response <- max.result$minimum
+  
+
+
+
+E10 <- max.response * 0.1
+# Solve for EC10/AC10
+
+
+
+      EC10.result <- optimize(f = ECx.obj, interval = c(-1000,1000),
                             E = E10,
                             Ci = Cij,
                             tp = tp.ij,
                             AC50 = AC50.ij)
-      
+
       EC10.GCA <- EC10.result$minimum
+      # print(EC10.GCA,digits = 3)
+      # Calculate the AC10
+      # This accounts for the uncertainty since it is based 
+      # the randomly sampled top of the curve and logAC50 parameter
+      E10.by.chem <- tp.ij * 0.1
+      AC10.ij <- tcplHillConc_v2(E10.by.chem,tp.ij,AC50.ij,
+                              rep(1,length(tp.ij)))
+      
     
       sCij <- sum(Cij)
-      GCA.HQ.50[iter] <- sCij / EC50.GCA
-      GCA.HQ.10[iter] <- sCij / EC10.GCA
-      IA.HQ.50[iter]  <- sum(Cij)
-    # Independent HQ - sum each HQ
-    # CA HQ - calculate the ECx value - compare to sum_Ci
-    
+      if (EC10.GCA>0){
+        GCA.HQ.10[iter] <- sCij / EC10.GCA
+      }
+      IA.HQ.10[iter]  <- sum(Cij / AC10.ij)
+      
+      
+
   }
   
-  
-  
 
-  
-  
-  # Add the doses by chemical for each MC.iter
-  dose.sum <- log10(rowSums(invitro.conc.by.county[[x]]))
-  # Do the additivity based on the  concentration weighting
-  tp.val <- rowSums(tp.sim * proportion.by.county[[x]])
-  AC50.val <- rowSums(AC50.sim * proportion.by.county[[x]])
-
-  # CALCULATE THE DOSE RESPONSE!
-  dose.response <- tcplHillVal(dose.sum,tp.val,AC50.val,slope.val)
-  
-  hazard.quotient <- rowSums(invitro.conc.by.county[[x]] / 10^AC50.sim)
-
-  df <- data.frame("DR"= dose.response,"HQ" = hazard.quotient)
+  df <- data.frame("GCA.Eff"= GCA.eff,"IA.eff" = IA.eff, 
+                   "GCA.HQ.10" = GCA.HQ.10,"IA.HQ.10" = IA.HQ.10)
   return(df)
 }
 
