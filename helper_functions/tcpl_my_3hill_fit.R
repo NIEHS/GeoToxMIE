@@ -54,7 +54,10 @@ my_3hill_fit <- function(conc, resp,log = FALSE, verbose = FALSE)
   mdl$val <- fit$value
   mdl$convergence <- fit$convergence
   mdl$AIC <- aic
-  
+  mdl$logc_max <- logc_max
+  mdl$logc_min <- logc_min
+  mdl$resp_max <- resp_max
+  mdl$resp_min <- resp_min  
   
 
   return(mdl)

@@ -5,8 +5,8 @@ ECx.obj <- function(ECmix,E,Ci,tp,AC50){
   # Based on a regular space AC50 and concentrations 
   
   ECi <- tcplHillConc_v2(E,tp,AC50,rep(1,length(tp)))
-  
-  ECx.val <- sum( pi * ECmix / ECi,na.rm = F)
+  Pi <- Ci / sum(Ci)
+  ECx.val <- sum( Pi * ECmix / ECi,na.rm = F)
   val <- (ECx.val - 1)^2
   return(val)
   
