@@ -65,7 +65,7 @@ sim.IR.BW <- function(MC.iter,age.data){
   
 
   IR.fun <- function(x){
-    rnorm(length(IR[[x]]$IR.mean),mean = IR[[x]]$IR.mean,sd = IR[[x]]$IR.sd)
+    rtruncnorm(length(IR[[x]]$IR.mean),0,Inf,mean = IR[[x]]$IR.mean,sd = IR[[x]]$IR.sd)
   }
   
   IR.by.county <- lapply(1:length(IR),IR.fun)
