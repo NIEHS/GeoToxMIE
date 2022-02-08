@@ -65,7 +65,7 @@ census.age.overlap <- census.age[idx.FIPS,]
 
 age.by.county <- census.age.sim(MC.iter,census.age.overlap)
 
-# age.by.county.median<- lapply(age.by.county, FUN= function (x) median(x))
+age.by.county.median<- lapply(age.by.county, FUN= function (x) median(x))
 age.by.county.median <- lapply(age.by.county.median, FUN = function (x) replicate(MC.iter, x))
 
 
