@@ -68,3 +68,15 @@ df.plot <-  reshape2::melt(val.comb,id.vars = "X")
 
 ggplot(df.plot,aes(X,value,color = variable)) + geom_line()+ 
   scale_x_log10(labels = trans_format("log10", math_format(10^.x)))
+
+
+for (i in 1:length(ice.data.by.chem)){
+  df <- data.frame("X" = X,"Y" = val.2hill[,i])
+  p <- ggplot()+ geom_line(data = df,aes(X,Y))+ 
+    geom_point(data = ice.data.by.chem[[i]],aes(10^logc,resp),size = 2,color ="red")+ 
+    scale_x_log10(labels = trans_format("log10", math_format(10^.x)))+
+    ggtitle(ice.data.by.chem[[i]]$chnm[1])
+  print(p)
+  
+}
+
