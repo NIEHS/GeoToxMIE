@@ -164,7 +164,9 @@ run.dr.fun <- function(x){
   logc.max <- cyp1a1_up.by.county[[x]]$logc_max
   nl <- length(tp.mean)
   
-  mixture.response.interval <- c(min(resp.min) - 0.5 ,max(resp.max) * 4)
+  # mixture.response.interval <- c(min(resp.min) - 0.5 ,max(resp.max) * 4)
+  # mixture.response.interval <- c(-10^6,10^6)
+  mixture.response.interval <- c(-50,50)
   
   # Simulate the D-R parameters from a truncated normal distribution
   # We have MC.iter simulations for each chemical
@@ -185,8 +187,8 @@ run.dr.fun <- function(x){
                                Ci = Cij,
                                tp = tp.ij,
                                AC50 = AC50.ij)
-    
-    GCA.eff[iter] <- mixture.result$minimum
+    # print(mixture.result)
+    GCA.eff[iter] <- exp(mixture.result$minimum)
     
     IA.eff[iter] <- IA.pred(Cij,tp.ij,AC50.ij)
     
@@ -200,7 +202,7 @@ run.dr.fun <- function(x){
                            tp = tp.ij,
                            AC50 = AC50.ij)
     
-    max.response <- max.result$minimum
+    max.response <- exp(max.result$minimum)
     
     
     
