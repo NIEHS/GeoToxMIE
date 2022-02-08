@@ -30,9 +30,7 @@ source(paste0(local.path.functions,"ECmix-obj.R"),echo = FALSE)
 
 MC.iter <- 10^3
 ##################################################################################################
-##### MC-ToxGeo-up-to-IVIVE ####
 
-#Note: Run Order #2
 
 
 # Load the dataframe with county FIPS, Pollutant Concentration, and EPA/ICE IVIVE data
