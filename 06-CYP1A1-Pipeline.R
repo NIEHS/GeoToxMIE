@@ -16,6 +16,7 @@ library(sjPlot)
 library(viridisLite)
 library(ggpubr)
 library(reshape)
+library(scales)
 
 # load data
 load("/Volumes/SHAG/GeoTox/data/final_response_by_county_20220201.RData")
@@ -53,7 +54,7 @@ colnames(response.by.county)<- cbind("health_measure", "value", "id")
 ivive.summary.df <- response.by.county %>%
   group_by(id, health_measure)%>%
   summarise(median = median(value , na.rm = TRUE),
-            mean = mean(value, na.rm = TRUE),
+            #mean = mean(value, na.rm = TRUE),
             x95_quantile = quantile(value, 0.95, na.rm = TRUE),
             x5_quantile = quantile(value, 0.05, na.rm = TRUE))%>%
             as.data.frame()
@@ -63,13 +64,65 @@ ivive.summary.df <- left_join(ivive.summary.df, FIPS, by="id", keep=FALSE)
 write.csv(ivive.summary.df, "/Volumes/SHAG/GeoTox/data/mc_all_summary_df_20220208.csv")
 
 # make data spatial
-ivive_county_cyp1a1_up_sp<- left_join(county_2014, ivive.summary.df, by=c("countyid" = "FIPS"), keep=FALSE)
+ivive.summary.df_stack <- melt(ivive.summary.df[,2:ncol(ivive.summary.df)], id.vars=c("FIPS", "health_measure"))
+# order variable for plotting
+ivive.summary.df_stack$variable = factor(ivive.summary.df_stack$variable, levels = c("x5_quantile","median","x95_quantile"))
+
+
+ivive_county_cyp1a1_up_sp<- left_join(county_2014, ivive.summary.df_stack, by=c("countyid" = "FIPS"), keep=FALSE)
 ivive_county_cyp1a1_up_sf <-st_as_sf(ivive_county_cyp1a1_up_sp)
 
 ################################################################################################
-#### Plots ####
+#### Multi Panel Plots ####
 #GCA.Eff, IA.eff, GCA.HQ.10, IA.HQ.10
+plot.labs <- as_labeller(c(`x5_quantile` = "5th Percentile", `median` = "Median", `x95_quantile` = "95th Percentile"))
 
+GCA.Eff.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure == "GCA.Eff"), 
+                       aes(fill=value))+
+  geom_sf(lwd = 0)+
+  facet_wrap(~variable, nrow=2, ncol=3, labeller = plot.labs)+
+  theme_bw()+
+  labs(fill="Sum")+
+  scale_fill_distiller(name="Log2 Fold Change", palette = "YlGnBu", direction = 1, trans = "sqrt") +
+  geom_sf(data = states, fill = NA, size=0.15)+
+  theme(text = element_text(size = 14)) 
+save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_Eff_figureh_20220209.tif", GCA.Eff.plot, width = 40, height = 7, dpi = 200)
+
+IA.Eff.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure == "IA.eff"), 
+                       aes(fill=value))+
+  geom_sf(lwd = 0)+
+  facet_wrap(~variable, nrow=2, ncol=3, labeller = plot.labs)+
+  theme_bw()+
+  labs(fill="Sum")+
+  scale_fill_distiller(name="Log2 Fold Change", palette = "YlGnBu", direction = 1, trans = "sqrt") +
+  geom_sf(data = states, fill = NA, size=0.15)+
+  theme(text = element_text(size = 14)) 
+save_plot("/Volumes/SHAG/GeoTox/data/plots/IA_Eff_figureh_20220209.tif", IA.Eff.plot, width = 40, height = 7, dpi = 200)
+
+GCA.HQ.10.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure == "GCA.HQ.10"), 
+                      aes(fill=value))+
+  geom_sf(lwd = 0)+
+  facet_wrap(~variable, nrow=2, ncol=3, labeller = plot.labs)+
+  theme_bw()+
+  labs(fill="Sum")+
+  scale_fill_distiller(name="Hazard Quotient", palette = "YlGnBu", direction = 1, trans = "sqrt") +
+  geom_sf(data = states, fill = NA, size=0.15)+
+  theme(text = element_text(size = 14)) 
+save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_HQ10_figureh_20220209.tif", GCA.HQ.10.plot, width = 40, height = 7, dpi = 200)
+
+
+IA.HQ.10.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure == "IA.HQ.10"), 
+                         aes(fill=value))+
+  geom_sf(lwd = 0)+
+  facet_wrap(~variable, nrow=2, ncol=3, labeller = plot.labs)+
+  theme_bw()+
+  labs(fill="Sum")+
+  scale_fill_distiller(name="Hazard Quotient", palette = "YlGnBu", direction = 1, trans = "sqrt") +
+  geom_sf(data = states, fill = NA, size=0.15)+
+  theme(text = element_text(size = 14)) 
+save_plot("/Volumes/SHAG/GeoTox/data/plots/IA_HQ10_figureh_20220209.tif", IA.HQ.10.plot, width = 40, height = 7, dpi = 200)
+
+#### Individual Plots ####
 #### GCA.Eff ####
 GCA.Eff.median.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure == "GCA.Eff"), 
                               aes(fill=median)) +
@@ -156,6 +209,7 @@ GCA.HQ.10.median.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_
   labs(fill="Sum")+
   scale_fill_distiller(name="Log2 Fold Change", palette = "YlGnBu", direction = 1) +
   geom_sf(data = states, fill = NA, size=0.15)+
+  #scale_x_log10(labels = trans_format("log10", math_format(10^.x)))+
   theme(text = element_text(size = 14)) 
 
 GCA.HQ.10.95.quantile.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure == "GCA.HQ.10"),
@@ -165,6 +219,7 @@ GCA.HQ.10.95.quantile.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, he
   labs(fill="Sum")+
   scale_fill_distiller(name="Log2 Fold Change", palette = "YlGnBu", direction = 1) +
   geom_sf(data = states, fill = NA, size=0.15)+
+  #scale_x_log10(labels = trans_format("log10", math_format(10^.x)))+
   theme(text = element_text(size = 14)) 
 
 GCA.HQ.10.5.quantile.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure == "GCA.HQ.10"),
@@ -173,6 +228,7 @@ GCA.HQ.10.5.quantile.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, hea
   theme_bw()+
   labs(fill="Sum")+
   scale_fill_distiller(name="Log2 Fold Change", palette = "YlGnBu", direction = 1) +
+  #scale_x_log10(labels = trans_format("log10", math_format(10^.x)))+
   geom_sf(data = states, fill = NA, size=0.15)+
   theme(text = element_text(size = 14)) 
 
@@ -185,7 +241,7 @@ GCA_HQ10_figureh=ggarrange(GCA.HQ.10.5.quantile.plot, GCA.HQ.10.median.plot, GCA
                          ncol = 3, nrow = 1,
                          common.legend = FALSE,
                          legend = "right")
-save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_HQ10_figureh_20220208.tif", GCA_HQ10_figureh, width = 40, height = 7, dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/log2_GCA_HQ10_figureh_20220208.tif", GCA_HQ10_figureh, width = 40, height = 7, dpi = 200)
 
 
 #### IA.HQ.10 ####
