@@ -128,7 +128,7 @@ css.sensitivity.httk <- get(load("/Volumes/SHAG/GeoTox/data/css_by_county_sensit
 
 invitro.fun <- function(x){
   
-  invitro <- inhalation.dose.by.county[[x]] * css.sensitivity.obesity[[x]]
+  invitro <- inhalation.dose.by.county[[x]] * css.sensitivity.httk[[x]]
   return(invitro)
 }
 
