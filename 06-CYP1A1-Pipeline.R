@@ -83,8 +83,9 @@ GCA.Eff.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure =
   facet_wrap(~variable, nrow=2, ncol=3, labeller = plot.labs)+
   theme_bw()+
   labs(fill="Sum")+
-  scale_fill_viridis_c(name = "Efficacy (Log2 FC)",direction = -1,option = "A",trans = "log10",labels = trans_format("log10", math_format(10^.x)),
-                      limits = c(NA,10^-2),  oob = scales::squish)+
+  scale_fill_viridis_c(name = "Efficacy (Log2 FC)",direction = -1,option = "A",trans = "sqrt",labels = trans_format("log10", math_format(10^.x)),
+                      limits = c(NA,10^-1),breaks = 10^seq(-3,-1,by = 1),
+                       oob = scales::squish)+
   geom_sf(data = states, fill = NA, size=0.15)+
   theme(text = element_text(size = 14)) 
 print(GCA.Eff.plot)
@@ -109,7 +110,7 @@ GCA.HQ.10.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure
   theme_bw()+
   labs(fill="Sum")+
   scale_fill_viridis_c(name = "Hazard Quotient",direction = -1,option = "A",trans = "log10",labels = trans_format("log10", math_format(10^.x)),
-                       limits = c(NA,10^-1),  oob = scales::squish)+
+                       limits = c(NA,10^-1),  oob = scales::squish  scale_fill_viridis_c(name = "Hazard Quotient",direction = -1,option = "A",trans = "log10",labels = trans_format("log10", math_format(10^.x)))+
   geom_sf(data = states, fill = NA, size=0.15)+
   theme(text = element_text(size = 14)) 
 save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_HQ10_figureh_20220209.tif", GCA.HQ.10.plot, width = 40, height = 7, dpi = 200)
