@@ -84,7 +84,7 @@ GCA.Eff.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure =
   theme_bw()+
   labs(fill="Sum")+
   scale_fill_viridis_c(name = "Efficacy (Log2 FC)",direction = -1,option = "A",trans = "sqrt",labels = trans_format("log10", math_format(10^.x)),
-                      limits = c(NA,10^-1),breaks = 10^seq(-3,-1,by = 1),
+                      limits = c(NA,10^-2),breaks = c(10^-4,10^seq(-3,-2,by = 0.5)),
                        oob = scales::squish)+
   geom_sf(data = states, fill = NA, size=0.15)+
   theme(text = element_text(size = 14)) 
