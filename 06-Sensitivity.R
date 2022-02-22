@@ -13,7 +13,7 @@ library(scales)
 
 
 ## Sensitivity plots with each of the MC.iterations
-
+# load data
 sensitivity.ext.conc <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_05_ext_conc.RData"))
 sensitivity.httk <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_03_httk.RData"))
 sensitivity.obesity <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_02_obesity.RData"))
@@ -22,6 +22,8 @@ baseline <- get(load("/Volumes/SHAG/GeoTox/data/final_response_by_county_2022020
 sensitivity.conc.resp <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_04_conc_resp.RData"))
 
 
+
+#### Efficacy - GCA ####
 sensitivity.GCA.Eff <- NULL
 for (x in 1:length(sensitivity.ext.conc)){
   print(x)
@@ -34,7 +36,7 @@ for (x in 1:length(sensitivity.ext.conc)){
 
 }
 
-colnames(sensitivity.GCA.Eff) <- c("External-Concentration","TK-params",
+colnames(sensitivity.GCA.Eff) <- c("External Concentration","Toxicokinetic Parameters",
                               "Obesity","Age","Concentration-Response",
                               "Baseline")
 
@@ -44,19 +46,22 @@ CR.melt <- melt(sensitivity.GCA.Eff)
 conc.resp.plot.GCA <-ggplot(CR.melt, aes(x = value, y = as.factor(Var2), fill = as.factor(Var2))) +
   stat_density_ridges( #bandwidth = 0.5
                       geom = "density_ridges_gradient", calc_ecdf = TRUE, 
-                      quantiles = 4, quantile_lines = TRUE
-  )  + 
-   coord_cartesian(xlim = c(10^-10,10^1))+
+                      quantiles = 4, quantile_lines = FALSE
+                      )+ 
+  coord_cartesian(xlim = c(10^-10,10^1))+
   scale_x_log10(labels = trans_format("log10", math_format(10^.x)))+
   scale_fill_viridis_d(option = "C")+
   theme(legend.position = "none")+
   xlab("Median Log2 Fold Change mRNA Expression CYP1A1")+
-  ylab("Varying Parameter")+ggtitle("Sensitivity Results - Efficacy - GCA model")
+  ylab("Varying Parameter")+
+  theme_bw()+
+  theme(text = element_text(size = 14), legend.position="none", axis.text=element_text(size=14),
+        axis.title=element_text(size=14)) 
 conc.resp.plot.GCA
-save_plot("/Volumes/SHAG/GeoTox/data/plots/Sensitivity_GCA_Eff_20220209.tif", conc.resp.plot.GCA,dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/Sensitivity_GCA_Eff_20220218.tif", conc.resp.plot.GCA,dpi = 200)
 
 
-
+#### Efficacy - IA model ####
 sensitivity.IA.eff <- NULL
 for (x in 1:length(sensitivity.ext.conc)){
   print(x)
@@ -69,29 +74,30 @@ for (x in 1:length(sensitivity.ext.conc)){
   
 }
 
-colnames(sensitivity.IA.eff) <- c("External-Concentration","TK-params",
-                                   "Obesity","Age","Concentration-Response",
-                                   "Baseline")
-
+colnames(sensitivity.IA.eff) <- c("External Concentration","Toxicokinetic Parameters",
+                                  "Obesity","Age","Concentration-Response",
+                                  "Baseline")
 
 CR.IA.melt <- melt(sensitivity.IA.eff)
 
 conc.resp.plot.IA <-ggplot(CR.IA.melt, aes(x = value, y = as.factor(Var2), fill = as.factor(Var2))) +
   stat_density_ridges( #bandwidth = 0.5
     geom = "density_ridges_gradient", calc_ecdf = TRUE, 
-    quantiles = 4, quantile_lines = TRUE
-  )  + 
+    quantiles = 4, quantile_lines = FALSE
+    )  + 
   coord_cartesian(xlim = c(10^-10,10^1))+
   scale_x_log10(labels = trans_format("log10", math_format(10^.x)))+
   scale_fill_viridis_d(option = "C")+
   theme(legend.position = "none")+
   xlab("Median Log2 Fold Change mRNA Expression CYP1A1")+
-  ylab("Varying Parameter")+ggtitle("Sensitivity Results - Efficacy - IA model")
+  ylab("Varying Parameter")+
+  theme_bw()+
+  theme(text = element_text(size = 14), legend.position="none", axis.text=element_text(size=14),
+        axis.title=element_text(size=14)) 
 conc.resp.plot.IA
-save_plot("/Volumes/SHAG/GeoTox/data/plots/Sensitivity_IA_Eff_20220209.tif", conc.resp.plot.IA,  dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/Sensitivity_IA_Eff_20220218.tif", conc.resp.plot.IA,  dpi = 200)
 
-########## Hazard Quotients
-
+##### HQ - GCA model ####
 sensitivity.GCA.HQ.10<- NULL
 for (x in 1:length(sensitivity.ext.conc)){
   print(x)
@@ -104,29 +110,34 @@ for (x in 1:length(sensitivity.ext.conc)){
   
 }
 
-colnames(sensitivity.GCA.HQ.10) <- c("External-Concentration","TK-params",
-                                   "Obesity","Age","Concentration-Response",
-                                   "Baseline")
+colnames(sensitivity.GCA.HQ.10) <- c("External Concentration","Toxicokinetic Parameters",
+                                     "Obesity","Age","Concentration-Response",
+                                     "Baseline")
 
 
 HQ.GCA.melt <- melt(sensitivity.GCA.HQ.10)
 
+
 HQ.plot.GCA <-ggplot(HQ.GCA.melt, aes(x = value, y = as.factor(Var2), fill = as.factor(Var2))) +
   stat_density_ridges( #bandwidth = 0.5
     geom = "density_ridges_gradient", calc_ecdf = TRUE, 
-    quantiles = 4, quantile_lines = TRUE
+    quantiles = 4, quantile_lines = FALSE
   )  + 
   coord_cartesian(xlim = c(10^-10,10^1))+
   scale_x_log10(labels = trans_format("log10", math_format(10^.x)))+
   scale_fill_viridis_d(option = "C")+
   theme(legend.position = "none")+
-  xlab("Hazard Quotient, CYP1A1")+
-  ylab("Varying Parameter")+ggtitle("Sensitivity Results - HQ - GCA model")
+  xlab("CYP1A1 Hazard Quotient")+
+  ylab("Varying Parameter")+
+  theme_bw()+
+  theme(text = element_text(size = 14), legend.position="none", axis.text=element_text(size=14),
+        axis.title=element_text(size=14)) 
 HQ.plot.GCA
-save_plot("/Volumes/SHAG/GeoTox/data/plots/Sensitivity_GCA_HQ_20220209.tif", HQ.plot.GCA, dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/Sensitivity_GCA_HQ_20220218.tif", HQ.plot.GCA, dpi = 200)
 
 
 
+#### HQ - IA model ####
 sensitivity.IA.HQ.10 <- NULL
 for (x in 1:length(sensitivity.ext.conc)){
   print(x)
@@ -139,9 +150,9 @@ for (x in 1:length(sensitivity.ext.conc)){
   
 }
 
-colnames(sensitivity.IA.HQ.10) <- c("External-Concentration","TK-params",
-                                  "Obesity","Age","Concentration-Response",
-                                  "Baseline")
+colnames(sensitivity.IA.HQ.10) <- c("External Concentration","Toxicokinetic Parameters",
+                                    "Obesity","Age","Concentration-Response",
+                                    "Baseline")
 
 
 HQ.IA.melt <- melt(sensitivity.IA.HQ.10)
@@ -149,16 +160,41 @@ HQ.IA.melt <- melt(sensitivity.IA.HQ.10)
 HQ.plot.IA <-ggplot(HQ.IA.melt, aes(x = value, y = as.factor(Var2), fill = as.factor(Var2))) +
   stat_density_ridges( #bandwidth = 0.5
     geom = "density_ridges_gradient", calc_ecdf = TRUE, 
-    quantiles = 4, quantile_lines = TRUE
+    quantiles = 4, quantile_lines = FALSE
   )  + 
   coord_cartesian(xlim = c(10^-10,10^1))+
   scale_x_log10(labels = trans_format("log10", math_format(10^.x)))+
   scale_fill_viridis_d(option = "C")+
   theme(legend.position = "none")+
-  xlab("Hazard Quotient CYP1A1")+
-  ylab("Varying Parameter")+ggtitle("Sensitivity Results - HQ - IA model")
+  xlab("CYP1A1 Hazard Quotient")+
+  ylab("Varying Parameter")+
+  theme_bw()+
+  theme(text = element_text(size = 14), legend.position="none", axis.text=element_text(size=14),
+        axis.title=element_text(size=14)) 
 HQ.plot.IA
-save_plot("/Volumes/SHAG/GeoTox/data/plots/Sensitivity_IA_HQ_20220209.png", HQ.plot.IA)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/Sensitivity_IA_HQ_20220218.png", HQ.plot.IA)
 
 
+#### Combine Plots ####
+GCA=ggarrange(conc.resp.plot.GCA , HQ.plot.GCA, 
+              labels = c( "A", "B"),
+              vjust = 1,
+              align = "v",
+              #hjust = -0.5,
+              ncol = 2, nrow = 1,
+              font.label = list(size = 20, color = "black", face = "bold"),
+              common.legend = FALSE)
+GCA
+save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_sensitivity_composite_20220219.tif", GCA, width = 40, height = 20, dpi = 300)
+
+IA=ggarrange(conc.resp.plot.IA , HQ.plot.IA, 
+              labels = c( "A", "B"),
+              vjust = 1,
+              align = "v",
+              #hjust = -0.5,
+              ncol = 2, nrow = 1,
+              font.label = list(size = 20, color = "black", face = "bold"),
+              common.legend = FALSE)
+IA
+save_plot("/Volumes/SHAG/GeoTox/data/plots/IA_sensitivity_composite_20220219.tif", IA, width = 40, height = 20, dpi = 300)
 

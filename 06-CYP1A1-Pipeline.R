@@ -83,13 +83,12 @@ GCA.Eff.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure =
   facet_wrap(~variable, nrow=2, ncol=3, labeller = plot.labs)+
   theme_bw()+
   labs(fill="Sum")+
-  scale_fill_viridis_c(name = "Efficacy (Log2 FC)",direction = -1,option = "A",trans = "sqrt",labels = trans_format("log10", math_format(10^.x)),
-                      limits = c(NA,10^-2),breaks = c(10^-4,10^seq(-3,-2,by = 0.5)),
+  scale_fill_viridis_c(name = "Response (Log2 FC)",direction = -1,option = "A",trans = "sqrt",labels = trans_format("log10", math_format(10^.x)),
+                      limits = c(NA,10^-1),breaks = c(10^-4,10^seq(-3,-1,by = 1)),
                        oob = scales::squish)+
   geom_sf(data = states, fill = NA, size=0.15)+
   theme(text = element_text(size = 14)) 
-print(GCA.Eff.plot)
-save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_Eff_figureh_20220209.tif", GCA.Eff.plot, width = 40, height = 7, dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_Eff_figureh_20220216.tif", GCA.Eff.plot, width = 40, height = 7, dpi = 200)
 
 IA.Eff.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure == "IA.eff"), 
                        aes(fill=value))+
@@ -97,11 +96,12 @@ IA.Eff.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure ==
   facet_wrap(~variable, nrow=2, ncol=3, labeller = plot.labs)+
   theme_bw()+
   labs(fill="Sum")+
-  scale_fill_viridis_c(name = "Efficacy (Log2 FC)",direction = -1,option = "A",trans = "log10",labels = trans_format("log10", math_format(10^.x)),
-                       limits = c(NA,10^-2),  oob = scales::squish)+
+  scale_fill_viridis_c(name = "Response (Log2 FC)",direction = -1,option = "A",trans = "sqrt",labels = trans_format("log10", math_format(10^.x)),
+                       limits = c(NA,10^-2),breaks = c(10^-4,10^seq(-3,-2,by = 1)),
+                       oob = scales::squish)+
   geom_sf(data = states, fill = NA, size=0.15)+
   theme(text = element_text(size = 14)) 
-save_plot("/Volumes/SHAG/GeoTox/data/plots/IA_Eff_figureh_20220209.tif", IA.Eff.plot, width = 40, height = 7, dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/IA_Eff_figureh_20220216.tif", IA.Eff.plot, width = 40, height = 7, dpi = 200)
 
 GCA.HQ.10.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure == "GCA.HQ.10"), 
                       aes(fill=value))+
@@ -109,11 +109,11 @@ GCA.HQ.10.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure
   facet_wrap(~variable, nrow=2, ncol=3, labeller = plot.labs)+
   theme_bw()+
   labs(fill="Sum")+
-  scale_fill_viridis_c(name = "Hazard Quotient",direction = -1,option = "A",trans = "log10",labels = trans_format("log10", math_format(10^.x)),
-                       limits = c(NA,10^-1),  oob = scales::squish  scale_fill_viridis_c(name = "Hazard Quotient",direction = -1,option = "A",trans = "log10",labels = trans_format("log10", math_format(10^.x)))+
+  scale_fill_viridis_c(name = "Hazard Quotient",direction = -1,option = "A",trans = "sqrt",labels = trans_format("log10", math_format(10^.x)),
+                       limits = c(NA,10^-1),  breaks = c(10^-3,10^seq(-3,-1,by = 1)), oob = scales::squish)+
   geom_sf(data = states, fill = NA, size=0.15)+
   theme(text = element_text(size = 14)) 
-save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_HQ10_figureh_20220209.tif", GCA.HQ.10.plot, width = 40, height = 7, dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_HQ10_figureh_20220216.tif", GCA.HQ.10.plot, width = 40, height = 7, dpi = 200)
 
 
 IA.HQ.10.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure == "IA.HQ.10"), 
@@ -122,11 +122,46 @@ IA.HQ.10.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure 
   facet_wrap(~variable, nrow=2, ncol=3, labeller = plot.labs)+
   theme_bw()+
   labs(fill="Sum")+
-  scale_fill_viridis_c(name = "Hazard Quotient",direction = -1,option = "A",trans = "log10",labels = trans_format("log10", math_format(10^.x)),
-                       limits = c(NA,10^-1),  oob = scales::squish)+
+  scale_fill_viridis_c(name = "Hazard Quotient",direction = -1,option = "A",trans = "sqrt",labels = trans_format("log10", math_format(10^.x)),
+                       limits = c(NA,10^-1),  breaks = c(10^-3,10^seq(-3,-1,by = 1)), oob = scales::squish)+
   geom_sf(data = states, fill = NA, size=0.15)+
   theme(text = element_text(size = 14)) 
-save_plot("/Volumes/SHAG/GeoTox/data/plots/IA_HQ10_figureh_20220209.tif", IA.HQ.10.plot, width = 40, height = 7, dpi = 200)
+IA.HQ.10.plot
+save_plot("/Volumes/SHAG/GeoTox/data/plots/IA_HQ10_figureh_20220216.tif", IA.HQ.10.plot, width = 40, height = 7, dpi = 200)
+
+# 2x3 plot 
+GCA=ggarrange(GCA.Eff.plot , GCA.HQ.10.plot, 
+                     labels = c( "A", "B"),
+                     vjust = 1,
+                    align = "v",
+                     #hjust = -0.5,
+                     ncol = 1, nrow = 2,
+                     font.label = list(size = 20, color = "black", face = "bold"),
+                     common.legend = FALSE)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_composite_20220216.tif", GCA, width = 40, height = 15, dpi = 300)
+
+IA=ggarrange(IA.Eff.plot , IA.HQ.10.plot, 
+              labels = c( "A", "B"),
+              vjust = 1,
+              align = "v",
+              #hjust = -0.5,
+              ncol = 1, nrow = 2,
+              font.label = list(size = 20, color = "black", face = "bold"),
+              common.legend = FALSE)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/IA_composite_20220216.tif", IA, width = 40, height = 15, dpi = 300)
+
+all=ggarrange(GCA.Eff.plot , GCA.HQ.10.plot, IA.Eff.plot , IA.HQ.10.plot, 
+             labels = c( "(A) Concentration Addition - Response", "(B) Concentration Addition - Hazard Quotient",
+                         "(C) Independent Action - Response", "(D) Indepdent Action - Harzard Quotient"),
+             align = "v",
+             #hjust = -0.5,
+             ncol = 1, nrow = 4,
+             font.label = list(size = 20, color = "black", face = "bold"),
+             common.legend = FALSE)
+save_plot("All_composite_20220216.tif", all, width = 40, height = 40, dpi = 300)
+
+
+
 
 #### Individual Plots ####
 #### GCA.Eff ####
