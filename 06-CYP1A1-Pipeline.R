@@ -68,6 +68,33 @@ ivive.summary.df_stack <- melt(ivive.summary.df[,2:ncol(ivive.summary.df)], id.v
 # order variable for plotting
 ivive.summary.df_stack$variable = factor(ivive.summary.df_stack$variable, levels = c("x5_quantile","median","x95_quantile"))
 
+# summary of health measure 
+ivive.summary.df_stack %>%
+  group_by(variable, health_measure)%>%
+  summarize(mean=mean(value),
+            min=min(value), 
+            max=max(value))
+
+
+dose.labs <- c("GCA Response", "IA Response", "GCA HQ", "IA HQ")
+names(dose.labs) <- c("GCA.Eff", "IA.eff", "GCA.HQ.10", "IA.HQ.10")
+
+supp.labs <- c("5th Percentile", "Median", "95th Percentile")
+names(supp.labs) <- c("x5_quantile", "median", "x95_quantile")
+
+plot.labs <- as_labeller(c(`x5_quantile` = "5th Percentile", `median` = "Median", `x95_quantile` = "95th Percentile"))
+hm_label <- as_labeller(c(`GCA.Eff` = "GCA Response", `IA.eff` = "IA Response", `GCA.HQ.10` = "GCA HQ", `IA.HQ.10` = "IA HQ"))
+
+histogram_HM <- ggplot(data=ivive.summary.df_stack, aes(x=log10(value)))+
+  geom_histogram(bins=500)+
+  facet_grid(health_measure ~ variable,
+             labeller=labeller(health_measure = dose.labs, variable =supp.labs ))+
+  theme_minimal()+
+  ylab("Count")+
+  xlab("Log10 Health Metric Value")
+histogram_HM
+save_plot("/Volumes/SHAG/GeoTox/data/plots/health_metric_histogram_0220225.tif", histogram_HM, width = 30, height = 30, dpi = 200)
+
 
 ivive_county_cyp1a1_up_sp<- left_join(county_2014, ivive.summary.df_stack, by=c("countyid" = "FIPS"), keep=FALSE)
 ivive_county_cyp1a1_up_sf <-st_as_sf(ivive_county_cyp1a1_up_sp)
