@@ -1,6 +1,9 @@
 ##################################################################################################
 # Sensitivity analysis - varying obesity 
 
+# set seed for reproducibility 
+set.seed(2345)
+
 # Libraries
 library(tidyverse)
 library(reshape2)
@@ -15,7 +18,8 @@ states <- st_as_sf(maps::map("state", plot = FALSE, fill = TRUE))
 
 # helper code
 
-local.path.functions <- c("/Volumes/messierkp/Projects/AEP-AOP/GeoToxMIE/helper_functions/")
+#local.path.functions <- c("/Volumes/messierkp/Projects/AEP-AOP/GeoToxMIE/helper_functions/")
+local.path.functions <- c("/Users/eccleskm/Desktop/GeoToxMIE/helper_functions/")
 
 # source("/Volumes/SHAG/GeoTox/R_functions/MC_pipeline/census.age.sim.R", echo=FALSE)
 source(paste0(local.path.functions,"census-age-sim.R"), echo=FALSE)
@@ -115,7 +119,7 @@ external.dose.by.county <- lapply(1:length(cyp1a1_up.by.county),sim.chem.fun)
 
 convert.fun <- function(x){
   print(x)
-  (external.dose.by.county[[x]]/1000) * replicate(ncol(external.dose.by.county[[x]]),IR.by.county[[x]])
+  (external.dose.by.county[[x]]/1000) * replicate(ncol(external.dose.by.county[[x]]),IR.by.county[[x]] *365)
 }
 
 inhalation.dose.by.county <- lapply(1:length(external.dose.by.county),convert.fun)
@@ -123,7 +127,7 @@ inhalation.dose.by.county <- lapply(1:length(external.dose.by.county),convert.fu
 
 ####################################################################################
 
-css.sensitivity.obesity <- get(load("/Volumes/SHAG/GeoTox/data/css_by_county_sensitivity_obesity_20220201.RData"))
+css.sensitivity.obesity <- get(load("/Volumes/SHAG/GeoTox/data/css_by_county_sensitivity_obesity_20220228.RData"))
 
 
 ####################################################################################
@@ -240,5 +244,5 @@ run.dr.fun <- function(x){
 final.response.by.county <- lapply(1:length(cyp1a1_up.by.county),run.dr.fun)
 
 
-save(final.response.by.county,file = "/Volumes/SHAG/GeoTox/data/sensitivity_results_02_obesity.RData")
+save(final.response.by.county,file = "/Volumes/SHAG/GeoTox/data/sensitivity_results_02_2_obesity.RData")
 

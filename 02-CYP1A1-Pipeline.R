@@ -3,7 +3,7 @@
 # Date: Oct 22nd, 2021
 # Edits: Kristin Eccles
 # QC, 12/8/21, KPM
-# Updated, Run, 01/24/2022
+# Updated, Run, 02/28/2022
 # Written in R Version 4.0.2
 ######################################################
 # Libraries
@@ -26,8 +26,11 @@ library(RColorBrewer)
 library(httk)
 library(truncnorm)
 
+# set seed for reproducibility 
+set.seed(2345)
+
 # specify the local path of the github repo
-local.path <- c("/Volumes/messierkp/Projects/AEP-AOP/GeoToxMIE/")
+local.path <- c("/Users/eccleskm/Desktop/GeoToxMIE/")
 
 # Load the dataframe with county FIPS, Pollutant Concentration, and EPA/ICE IVIVE data
 county_cyp1a1_up <- get(load("/Volumes/SHAG/GeoTox/data/county_cyp1a1_up_20220201.RData"))
@@ -171,12 +174,12 @@ external.dose.by.county <- lapply(1:length(cyp1a1_up.by.county),sim.chem.fun)
 nchems <- nrow(cyp1a1_up.by.county[[1]])
 convert.fun <- function(x){
   print(x)
-    (external.dose.by.county[[x]]/1000) * replicate(nrow(cyp1a1_up.by.county[[1]]),IR.by.county[[x]])
+    (external.dose.by.county[[x]]/1000) * replicate(nrow(cyp1a1_up.by.county[[1]]),IR.by.county[[x]] *365) 
 }
 
-inhalation.dose.by.county <- lapply(1:length(external.dose.by.county),convert.fun)
+inhalation.dose.by.county <- lapply(1:length(external.dose.by.county),convert.fun) 
 
-save(inhalation.dose.by.county,file = "/Volumes/SHAG/GeoTox/data/inhalation_dose_by_county_20220201.RData")
-save(age.by.county,file = "/Volumes/SHAG/GeoTox/data/age_by_county_20220201.RData")
-save(obesity.by.county,file = "/Volumes/SHAG/GeoTox/data/obesity_by_county_20220201.RData")
-save(cyp1a1_up.by.county,file = "/Volumes/SHAG/GeoTox/data/CYP1A1_by_county_20220201.RData")
+save(inhalation.dose.by.county,file = "/Volumes/SHAG/GeoTox/data/inhalation_dose_by_county_20220228.RData")
+save(age.by.county,file = "/Volumes/SHAG/GeoTox/data/age_by_county_20220228.RData")
+save(obesity.by.county,file = "/Volumes/SHAG/GeoTox/data/obesity_by_county_20220228.RData")
+save(cyp1a1_up.by.county,file = "/Volumes/SHAG/GeoTox/data/CYP1A1_by_county_20220228.RData")

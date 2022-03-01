@@ -1,12 +1,15 @@
 ######################################################
 # By: Kyle Messier
-# Updated, Run, 02/04/2022
+# Updated, Run, 02/28/2022
+# Edited By: Kristin Eccles
 # Written in R Version 4.0.2
 ######################################################
 # First script in the sensitivity analysis. This calculates 
 # average Css statistics for age, obesity, and httk params to use in their respective
 # sensitivity analyses
 
+# set seed for reproducibility 
+set.seed(2345)
 
 library(httk)
 library(truncnorm)
@@ -14,8 +17,8 @@ library(tidyverse)
 
 load_sipes2017()
 # load in the saved data
-age.by.county <- get(load("/Volumes/SHAG/GeoTox/data/age_by_county_20220201.RData"))
-obesity.by.county <- get(load("/Volumes/SHAG/GeoTox/data/obesity_by_county_20220201.RData"))
+age.by.county <- get(load("/Volumes/SHAG/GeoTox/data/age_by_county_20220228.RData"))
+obesity.by.county <- get(load("/Volumes/SHAG/GeoTox/data/obesity_by_county_20220228.RData"))
 
 # css.list <- get(load("/Volumes/SHAG/GeoTox/data/httk_IVIVE/httk_css_pre_simulate_20211209.RData"))
 
@@ -197,10 +200,10 @@ for (i in 1:length(age.by.county)){
 }
 
 save(css.sensitivity.obesity,
-     file = "/Volumes/SHAG/GeoTox/data/css_by_county_sensitivity_obesity_20220201.RData")
+     file = "/Volumes/SHAG/GeoTox/data/css_by_county_sensitivity_obesity_20220228.RData")
 
 save(css.sensitivity.age,
-     file = "/Volumes/SHAG/GeoTox/data/css_by_county_sensitivity_age_20220201.RData")
+     file = "/Volumes/SHAG/GeoTox/data/css_by_county_sensitivity_age_20220228.RData")
 
 save(css.sensitivity.httk,
-     file = "/Volumes/SHAG/GeoTox/data/css_by_county_sensitivity_httk_20220201.RData")
+     file = "/Volumes/SHAG/GeoTox/data/css_by_county_sensitivity_httk_20220228.RData")

@@ -10,6 +10,10 @@
 # This script precalculates steady states blood plasma concentrations based
 # a groups by age and obesity
 
+
+# set seed for reproducibility 
+set.seed(2345)
+
 # Load libraries
 
 library(httk)

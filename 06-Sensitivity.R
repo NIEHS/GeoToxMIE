@@ -14,22 +14,24 @@ library(scales)
 
 ## Sensitivity plots with each of the MC.iterations
 # load data
-sensitivity.ext.conc <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_05_ext_conc.RData"))
-sensitivity.httk <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_03_httk.RData"))
-sensitivity.obesity <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_02_obesity.RData"))
-sensitivity.age <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_01_age.RData"))
-baseline <- get(load("/Volumes/SHAG/GeoTox/data/final_response_by_county_20220201.RData"))
-sensitivity.conc.resp <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_04_conc_resp.RData"))
-
+sensitivity.ext.conc <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_05_2_ext_conc.RData"))
+sensitivity.httk <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_03_2_httk.RData"))
+sensitivity.obesity <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_02_2_obesity.RData"))
+sensitivity.age <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_01_2_age.RData"))
+baseline <- get(load("/Volumes/SHAG/GeoTox/data/final_response_by_county_20220228.RData"))
+sensitivity.conc.resp <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_04_2_conc_resp.RData"))
 
 
 #### Efficacy - GCA ####
 sensitivity.GCA.Eff <- NULL
 for (x in 1:length(sensitivity.ext.conc)){
   print(x)
-  CR <- cbind(sensitivity.ext.conc[[x]]$GCA.Eff,sensitivity.httk[[x]]$GCA.Eff,
-              sensitivity.obesity[[x]]$GCA.Eff,sensitivity.age[[x]]$GCA.Eff,
-              sensitivity.conc.resp[[x]]$GCA.Eff,baseline[[x]]$GCA.Eff)
+  CR <- cbind(sensitivity.ext.conc[[x]]$GCA.Eff,
+              sensitivity.httk[[x]]$GCA.Eff,
+              sensitivity.obesity[[x]]$GCA.Eff,
+              sensitivity.age[[x]]$GCA.Eff,
+              sensitivity.conc.resp[[x]]$GCA.Eff,
+              baseline[[x]]$GCA.Eff)
   
   sensitivity.GCA.Eff <- rbind(sensitivity.GCA.Eff,CR)
   
@@ -43,7 +45,7 @@ colnames(sensitivity.GCA.Eff) <- c("External Concentration","Toxicokinetic Param
 
 CR.melt <- melt(sensitivity.GCA.Eff)
 
-conc.resp.plot.GCA <-ggplot(CR.melt, aes(x = value, y = as.factor(Var2), fill = as.factor(Var2))) +
+conc.resp.plot.GCA <-ggplot(CR.melt, aes(x = value, y = as.factor(X2), fill = as.factor(X2))) +
   stat_density_ridges( #bandwidth = 0.5
                       geom = "density_ridges_gradient", calc_ecdf = TRUE, 
                       quantiles = 4, quantile_lines = FALSE
@@ -80,7 +82,7 @@ colnames(sensitivity.IA.eff) <- c("External Concentration","Toxicokinetic Parame
 
 CR.IA.melt <- melt(sensitivity.IA.eff)
 
-conc.resp.plot.IA <-ggplot(CR.IA.melt, aes(x = value, y = as.factor(Var2), fill = as.factor(Var2))) +
+conc.resp.plot.IA <-ggplot(CR.IA.melt, aes(x = value, y = as.factor(X2), fill = as.factor(X2))) +
   stat_density_ridges( #bandwidth = 0.5
     geom = "density_ridges_gradient", calc_ecdf = TRUE, 
     quantiles = 4, quantile_lines = FALSE
@@ -118,7 +120,7 @@ colnames(sensitivity.GCA.HQ.10) <- c("External Concentration","Toxicokinetic Par
 HQ.GCA.melt <- melt(sensitivity.GCA.HQ.10)
 
 
-HQ.plot.GCA <-ggplot(HQ.GCA.melt, aes(x = value, y = as.factor(Var2), fill = as.factor(Var2))) +
+HQ.plot.GCA <-ggplot(HQ.GCA.melt, aes(x = value, y = as.factor(X2), fill = as.factor(X2))) +
   stat_density_ridges( #bandwidth = 0.5
     geom = "density_ridges_gradient", calc_ecdf = TRUE, 
     quantiles = 4, quantile_lines = FALSE
@@ -157,7 +159,7 @@ colnames(sensitivity.IA.HQ.10) <- c("External Concentration","Toxicokinetic Para
 
 HQ.IA.melt <- melt(sensitivity.IA.HQ.10)
 
-HQ.plot.IA <-ggplot(HQ.IA.melt, aes(x = value, y = as.factor(Var2), fill = as.factor(Var2))) +
+HQ.plot.IA <-ggplot(HQ.IA.melt, aes(x = value, y = as.factor(X2), fill = as.factor(X2))) +
   stat_density_ridges( #bandwidth = 0.5
     geom = "density_ridges_gradient", calc_ecdf = TRUE, 
     quantiles = 4, quantile_lines = FALSE
@@ -185,7 +187,7 @@ GCA=ggarrange(conc.resp.plot.GCA , HQ.plot.GCA,
               font.label = list(size = 20, color = "black", face = "bold"),
               common.legend = FALSE)
 GCA
-save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_sensitivity_composite_20220219.tif", GCA, width = 40, height = 20, dpi = 300)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_sensitivity_composite_20220228.tif", GCA, width = 40, height = 20, dpi = 300)
 
 IA=ggarrange(conc.resp.plot.IA , HQ.plot.IA, 
               labels = c( "A", "B"),
@@ -196,5 +198,5 @@ IA=ggarrange(conc.resp.plot.IA , HQ.plot.IA,
               font.label = list(size = 20, color = "black", face = "bold"),
               common.legend = FALSE)
 IA
-save_plot("/Volumes/SHAG/GeoTox/data/plots/IA_sensitivity_composite_20220219.tif", IA, width = 40, height = 20, dpi = 300)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/IA_sensitivity_composite_20220228.tif", IA, width = 40, height = 20, dpi = 300)
 

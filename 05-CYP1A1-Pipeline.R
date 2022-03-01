@@ -2,7 +2,7 @@
 # By: Kyle Messier
 # Date: Oct 22nd, 2021
 # Edits: Kristin Eccles
-# Updated, Run, 01/24/2022
+# Updated, Run, 02/28/2022
 # Written in R Version 4.0.2
 ######################################################
 # Fifth script in the main CYCP1A1 analysis pipeline
@@ -14,22 +14,25 @@ library(httk)
 library(truncnorm)
 library(tidyverse)
 
+# set seed for reproducibility 
+set.seed(2345)
+
 #load code 
 # specify the local path of the github repo
-local.path.functions <- c("/Volumes/messierkp/Projects/AEP-AOP/GeoToxMIE/helper_functions/")
-source(paste0(local.path.functions,"tcplHillVal.R"), echo=FALSE)
-source(paste0(local.path.functions,"tcplHillVal_v2.R"), echo=FALSE)
-source(paste0(local.path.functions,"tcplHillConc.R"), echo=FALSE)
-source(paste0(local.path.functions,"tcplHillConc_v2.R"), echo=FALSE)
-source(paste0(local.path.functions,"GCA-obj.R"),echo = FALSE)
-source(paste0(local.path.functions,"IA-Pred.R"),echo = FALSE) 
-source(paste0(local.path.functions,"ECmix-obj.R"),echo = FALSE) 
+local.path <- c("/Users/eccleskm/Desktop/GeoToxMIE/")
+source(paste0(local.path,"helper_functions/tcplHillVal.R"), echo=FALSE)
+source(paste0(local.path,"helper_functions/tcplHillVal_v2.R"), echo=FALSE)
+source(paste0(local.path,"helper_functions/tcplHillConc.R"), echo=FALSE)
+source(paste0(local.path,"helper_functions/tcplHillConc_v2.R"), echo=FALSE)
+source(paste0(local.path,"helper_functions/GCA-obj.R"),echo = FALSE)
+source(paste0(local.path,"helper_functions/IA-Pred.R"),echo = FALSE) 
+source(paste0(local.path,"helper_functions/ECmix-obj.R"),echo = FALSE) 
 
 
 # load data 
-css.by.county <- get(load("/Volumes/SHAG/GeoTox/data/css_by_county_20220201.RData"))
-cyp1a1_up.by.county <- get(load("/Volumes/SHAG/GeoTox/data/CYP1A1_by_county_20220201.RData"))
-inhalation.dose.by.county <- get(load("/Volumes/SHAG/GeoTox/data/inhalation_dose_by_county_20220201.RData"))
+css.by.county <- get(load("/Volumes/SHAG/GeoTox/data/css_by_county_20220228.RData"))
+cyp1a1_up.by.county <- get(load("/Volumes/SHAG/GeoTox/data/CYP1A1_by_county_20220228.RData"))
+inhalation.dose.by.county <- get(load("/Volumes/SHAG/GeoTox/data/inhalation_dose_by_county_20220228.RData"))
 hill2.fit <- get(load("/Volumes/SHAG/GeoTox/data/Hill_2param_model_fit.RData"))
 
 
@@ -158,7 +161,7 @@ E10 <- max.response * 0.1
 # This should be a list by county, with MC.iter elements in each list entry
 final.response.by.county <- lapply(1:length(cyp1a1_up.by.county),run.dr.fun)
 
-save(final.response.by.county,file = "/Volumes/SHAG/GeoTox/data/final_response_by_county_20220201.RData")
+save(final.response.by.county,file = "/Volumes/SHAG/GeoTox/data/final_response_by_county_20220228.RData")
 
 
 

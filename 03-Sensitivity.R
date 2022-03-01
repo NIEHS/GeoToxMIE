@@ -1,6 +1,10 @@
 ##################################################################################################
 # Sensitivity analysis - varying httk parameters
 
+# set seed for reproducibility 
+set.seed(2345)
+
+
 # Libraries
 library(tidyverse)
 library(reshape2)
@@ -14,8 +18,8 @@ states <- st_as_sf(maps::map("state", plot = FALSE, fill = TRUE))
 
 
 # helper code
-
-local.path.functions <- c("/Volumes/messierkp/Projects/AEP-AOP/GeoToxMIE/helper_functions/")
+local.path.functions <- c("/Users/eccleskm/Desktop/GeoToxMIE/helper_functions/")
+#local.path.functions <- c("/Volumes/messierkp/Projects/AEP-AOP/GeoToxMIE/helper_functions/")
 
 # source("/Volumes/SHAG/GeoTox/R_functions/MC_pipeline/census.age.sim.R", echo=FALSE)
 source(paste0(local.path.functions,"census-age-sim.R"), echo=FALSE)
@@ -112,7 +116,7 @@ external.dose.by.county <- lapply(1:length(cyp1a1_up.by.county),sim.chem.fun)
 
 convert.fun <- function(x){
   print(x)
-  (external.dose.by.county[[x]]/1000) * replicate(ncol(external.dose.by.county[[x]]),IR.by.county[[x]])
+  (external.dose.by.county[[x]]/1000) * replicate(ncol(external.dose.by.county[[x]]),IR.by.county[[x]]*365)
 }
 
 inhalation.dose.by.county <- lapply(1:length(external.dose.by.county),convert.fun)
@@ -237,5 +241,5 @@ run.dr.fun <- function(x){
 final.response.by.county <- lapply(1:length(cyp1a1_up.by.county),run.dr.fun)
 
 
-save(final.response.by.county,file = "/Volumes/SHAG/GeoTox/data/sensitivity_results_03_httk.RData")
+save(final.response.by.county,file = "/Volumes/SHAG/GeoTox/data/sensitivity_results_03_2_httk.RData")
 
