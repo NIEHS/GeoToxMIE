@@ -45,18 +45,21 @@ colnames(sensitivity.GCA.Eff) <- c("External Concentration","Toxicokinetic Param
 
 CR.melt <- melt(sensitivity.GCA.Eff)
 
+CR.melt$X2 <- factor(CR.melt$X2, levels = c( "External Concentration","Toxicokinetic Parameters",
+                                                 "Concentration-Response","Age","Obesity", "Baseline"))
+
 conc.resp.plot.GCA <-ggplot(CR.melt, aes(x = value, y = as.factor(X2), fill = as.factor(X2))) +
   stat_density_ridges( #bandwidth = 0.5
                       geom = "density_ridges_gradient", calc_ecdf = TRUE, 
                       quantiles = 4, quantile_lines = FALSE
                       )+ 
-  coord_cartesian(xlim = c(10^-10,10^1))+
   scale_x_log10(labels = trans_format("log10", math_format(10^.x)))+
   scale_fill_viridis_d(option = "C")+
   theme(legend.position = "none")+
   xlab("Median Log2 Fold Change mRNA Expression CYP1A1")+
   ylab("Varying Parameter")+
-  theme_bw()+
+  theme_minimal()+
+  coord_cartesian(clip = "off")+
   theme(text = element_text(size = 14), legend.position="none", axis.text=element_text(size=14),
         axis.title=element_text(size=14)) 
 conc.resp.plot.GCA
@@ -82,18 +85,21 @@ colnames(sensitivity.IA.eff) <- c("External Concentration","Toxicokinetic Parame
 
 CR.IA.melt <- melt(sensitivity.IA.eff)
 
+CR.IA.melt$X2 <- factor(CR.IA.melt$X2, levels = c( "External Concentration","Toxicokinetic Parameters",
+                                             "Concentration-Response","Age","Obesity", "Baseline"))
+
 conc.resp.plot.IA <-ggplot(CR.IA.melt, aes(x = value, y = as.factor(X2), fill = as.factor(X2))) +
   stat_density_ridges( #bandwidth = 0.5
     geom = "density_ridges_gradient", calc_ecdf = TRUE, 
     quantiles = 4, quantile_lines = FALSE
     )  + 
-  coord_cartesian(xlim = c(10^-10,10^1))+
   scale_x_log10(labels = trans_format("log10", math_format(10^.x)))+
   scale_fill_viridis_d(option = "C")+
   theme(legend.position = "none")+
   xlab("Median Log2 Fold Change mRNA Expression CYP1A1")+
   ylab("Varying Parameter")+
-  theme_bw()+
+  theme_minimal()+
+  coord_cartesian(clip = "off")+
   theme(text = element_text(size = 14), legend.position="none", axis.text=element_text(size=14),
         axis.title=element_text(size=14)) 
 conc.resp.plot.IA
@@ -119,19 +125,21 @@ colnames(sensitivity.GCA.HQ.10) <- c("External Concentration","Toxicokinetic Par
 
 HQ.GCA.melt <- melt(sensitivity.GCA.HQ.10)
 
+HQ.GCA.melt$X2 <- factor(HQ.GCA.melt$X2, levels = c( "External Concentration","Toxicokinetic Parameters",
+                                                   "Concentration-Response","Age","Obesity", "Baseline"))
 
 HQ.plot.GCA <-ggplot(HQ.GCA.melt, aes(x = value, y = as.factor(X2), fill = as.factor(X2))) +
   stat_density_ridges( #bandwidth = 0.5
     geom = "density_ridges_gradient", calc_ecdf = TRUE, 
     quantiles = 4, quantile_lines = FALSE
   )  + 
-  coord_cartesian(xlim = c(10^-10,10^1))+
   scale_x_log10(labels = trans_format("log10", math_format(10^.x)))+
   scale_fill_viridis_d(option = "C")+
   theme(legend.position = "none")+
   xlab("CYP1A1 Hazard Quotient")+
   ylab("Varying Parameter")+
-  theme_bw()+
+  theme_minimal()+
+  coord_cartesian(clip = "off")+
   theme(text = element_text(size = 14), legend.position="none", axis.text=element_text(size=14),
         axis.title=element_text(size=14)) 
 HQ.plot.GCA
@@ -159,18 +167,21 @@ colnames(sensitivity.IA.HQ.10) <- c("External Concentration","Toxicokinetic Para
 
 HQ.IA.melt <- melt(sensitivity.IA.HQ.10)
 
+HQ.IA.melt$X2 <- factor(HQ.IA.melt$X2, levels = c( "External Concentration","Toxicokinetic Parameters",
+                                                     "Concentration-Response","Age","Obesity", "Baseline"))
+
 HQ.plot.IA <-ggplot(HQ.IA.melt, aes(x = value, y = as.factor(X2), fill = as.factor(X2))) +
   stat_density_ridges( #bandwidth = 0.5
     geom = "density_ridges_gradient", calc_ecdf = TRUE, 
     quantiles = 4, quantile_lines = FALSE
   )  + 
-  coord_cartesian(xlim = c(10^-10,10^1))+
   scale_x_log10(labels = trans_format("log10", math_format(10^.x)))+
   scale_fill_viridis_d(option = "C")+
   theme(legend.position = "none")+
   xlab("CYP1A1 Hazard Quotient")+
   ylab("Varying Parameter")+
-  theme_bw()+
+  theme_minimal()+
+  coord_cartesian(clip = "off")+
   theme(text = element_text(size = 14), legend.position="none", axis.text=element_text(size=14),
         axis.title=element_text(size=14)) 
 HQ.plot.IA
