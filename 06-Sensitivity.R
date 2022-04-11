@@ -136,14 +136,14 @@ HQ.plot.GCA <-ggplot(HQ.GCA.melt, aes(x = value, y = as.factor(X2), fill = as.fa
   scale_x_log10(labels = trans_format("log10", math_format(10^.x)))+
   scale_fill_viridis_d(option = "C")+
   theme(legend.position = "none")+
-  xlab("CYP1A1 Hazard Quotient")+
+  xlab("CYP1A1 Risk Quotient")+
   ylab("Varying Parameter")+
   theme_minimal()+
   coord_cartesian(clip = "off")+
   theme(text = element_text(size = 14), legend.position="none", axis.text=element_text(size=14),
         axis.title=element_text(size=14)) 
 HQ.plot.GCA
-save_plot("/Volumes/SHAG/GeoTox/data/plots/Sensitivity_GCA_HQ_20220218.tif", HQ.plot.GCA, dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/Sensitivity_GCA_HQ_20220411.tif", HQ.plot.GCA, dpi = 200)
 
 
 
@@ -178,14 +178,14 @@ HQ.plot.IA <-ggplot(HQ.IA.melt, aes(x = value, y = as.factor(X2), fill = as.fact
   scale_x_log10(labels = trans_format("log10", math_format(10^.x)))+
   scale_fill_viridis_d(option = "C")+
   theme(legend.position = "none")+
-  xlab("CYP1A1 Hazard Quotient")+
+  xlab("CYP1A1 Risk Quotient")+
   ylab("Varying Parameter")+
   theme_minimal()+
   coord_cartesian(clip = "off")+
   theme(text = element_text(size = 14), legend.position="none", axis.text=element_text(size=14),
         axis.title=element_text(size=14)) 
 HQ.plot.IA
-save_plot("/Volumes/SHAG/GeoTox/data/plots/Sensitivity_IA_HQ_20220218.png", HQ.plot.IA)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/Sensitivity_IA_HQ_220220411.tif", HQ.plot.IA)
 
 
 #### Combine Plots ####
@@ -198,7 +198,7 @@ GCA=ggarrange(conc.resp.plot.GCA , HQ.plot.GCA,
               font.label = list(size = 20, color = "black", face = "bold"),
               common.legend = FALSE)
 GCA
-save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_sensitivity_composite_20220228.tif", GCA, width = 40, height = 20, dpi = 300)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_sensitivity_composite_20220411.tif", GCA, width = 40, height = 20, dpi = 300)
 
 IA=ggarrange(conc.resp.plot.IA , HQ.plot.IA, 
               labels = c( "A", "B"),
@@ -209,5 +209,5 @@ IA=ggarrange(conc.resp.plot.IA , HQ.plot.IA,
               font.label = list(size = 20, color = "black", face = "bold"),
               common.legend = FALSE)
 IA
-save_plot("/Volumes/SHAG/GeoTox/data/plots/IA_sensitivity_composite_20220228.tif", IA, width = 40, height = 20, dpi = 300)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/IA_sensitivity_composite_20220411.tif", IA, width = 40, height = 20, dpi = 300)
 
