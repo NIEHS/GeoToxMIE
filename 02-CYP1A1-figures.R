@@ -21,6 +21,7 @@ ice_data <- get(load("/Volumes/SHAG/GeoTox/data/LTEA_HepaRG_CYP1A1_up 41 chems f
 unique(ice_data$chnm, ice_data$casn)
 hill2.fit <- get(load("/Volumes/SHAG/GeoTox/data/Hill_2param_model_fit.RData"))
 
+write.csv(hill2.fit, "hill2.fit.csv")
 # The concentration-response uses log10 concentration
 # We use the dataframe in the function to include the corresponding regular 
 # space X
@@ -28,6 +29,13 @@ hill2.fit <- get(load("/Volumes/SHAG/GeoTox/data/Hill_2param_model_fit.RData"))
 tcplHillVal <- function(logc, tp, ga, gw, bt = 0) {
   
   bt + (tp - bt)/(1 + 10^((ga - logc)*gw))
+  
+}
+
+# regular space
+tcplHillVal_v2 <- function(c, tp, ga, gw, bt = 0) {
+  
+  bt + (tp - bt) / (1 + (ga / c)^gw)
   
 }
 
@@ -41,25 +49,43 @@ hill2 <- get(load("/Volumes/SHAG/GeoTox/data/Hill_2param_model_fit.RData"))
 # Example hill model parameters (from the EPA/ICE database)
 
 tp.mean <- hill2$tp
-AC50.mean <- (hill2$logAC50)
-AC50.mean.normal <- 10^((hill2$logAC50))
+tp.sd <- hill2$tp.sd
+tp.lower <- tp.mean - tp.sd *1.96
+tp.upper <- tp.mean + tp.sd *1.96
 
-tp.sd<- (hill2$tp.sd)
-AC50.sd <- (hill2$logAC50.sd)
-AC50.sd.normal <- 10^(hill2$logAC50.sd)
+#constrain tp based on Filer 2020
+#tp_bound <- 1.2*hill2$resp_max
+#tp.upper.b <- ifelse(tp.upper > tp_bound, tp_bound, tp.upper)
+#tp.lower.b <- ifelse(tp.lower > tp_bound, tp_bound, tp.lower)
 
-tp.lower<- tp.mean - tp.sd 
-AC50.lower <- log10(AC50.mean.normal - AC50.sd.normal)
-#AC50.lower[AC50.lower < 0] <- 1
+# AC50
 
-tp.upper<- tp.mean + tp.sd
-AC50.upper <- log10(AC50.mean.normal + AC50.sd.normal)
+AC50.mean <- hill2$logAC50
+AC50.sd <- hill2$logAC50.sd
+AC50.lower <- AC50.mean - AC50.sd *1.96
+AC50.upper <- AC50.mean + AC50.sd *1.96
+
+# constrain ga 
+#ac50_bound1 <- hill2$logc_min* -2
+#ac50_bound2 <- hill2$logc_min + 0.5
+
+#AC50.upper.b <- ifelse(AC50.lower > ac50_bound1, ac50_bound1, AC50.lower)
+#AC50.lower.b <- ifelse(AC50.upper > ac50_bound2, ac50_bound2, AC50.upper)
+
+# regular space
+
+AC50.mean.r <- 10^(hill2$logAC50)
+AC50.sd.r <- 10^(hill2$logAC50.sd)
+AC50.lower.r <- 10^(AC50.mean - AC50.sd *1.96)
+AC50.upper.r <- 10^(AC50.mean - AC50.sd *1.96)
+
 
 slope <- c(1,1,1,1,1,1,1,1,1,1,
            1,1,1,1,1,1,1,1,1,1,
            1,1,1,1,1,1,1,1,1,1,1,
            1,1,1,1,1,1,1,1,1,1)
 
+#### Log Space ####
 myfun_mean <- function(x){
   val <- tcplHillVal(logX,tp.mean[x],AC50.mean[x],slope[x])
 
@@ -81,12 +107,42 @@ myfun_upper<- function(x){
   
   d <- data.frame("logX"= logX, "x"=X,  "upper" = val)
   return(d)
+  
+}
+
+#### Normal space ####
+
+myfun_mean <- function(x){
+  val <- tcplHillVal_v2(X,tp.mean[x],AC50.mean.r[x],slope[x])
+  
+  d <- data.frame("logX"= logX, "x"=X,"mean"=val)
+  return(d)
+}
+
+myfun_lower<- function(x){
+  
+  val <- tcplHillVal_v2(X,tp.lower[x],AC50.lower.r[x],slope[x])
+  
+  d <- data.frame("logX"= logX, "x"=X,"lower"=val)
+  return(d)
+}
+
+myfun_upper<- function(x){
+  
+  val <- tcplHillVal_v2(X,tp.upper[x],AC50.upper.r[x],slope[x])
+  
+  d <- data.frame("logX"= logX, "X"=X,  "upper" = val)
+  return(d)
+  
 }
 
 
+
+#### Plotting ####
 # Same sequence - one is log10 and other is regular space
-logX <- log10(seq(10^-1,10^3,length.out = 10000))
-X <-seq(10^-1,10^3,length.out = 10000)
+#logX <- seq(min(hill2.fit$logc_min),max(hill2.fit$logc_max),length.out = 10000)
+X = 10^(seq(log10(10^-3),log10(10^3),length.out = 10000))
+logX <-log10(X)
 
 
 val_mean <- lapply(1:41,myfun_mean)
@@ -114,7 +170,10 @@ hill2$chnm <- str_replace_all(hill2$chnm, "C.I. Azoic Diazo Component", "Benzidi
 
 
 m <- left_join(m, hill2[,c("id", "chnm")], by="id", keep=FALSE)
-m$lower[m$lower < 0] <- 0
+
+#contrain lower bound
+#m$lower[m$lower < 0] <- 0
+
   
 SI_figure<- ggplot()+
 
@@ -129,7 +188,7 @@ SI_figure<- ggplot()+
         text = element_text(size = 16))+
   ylab("Response")+
   xlab("Concentration")
-SI_figure
+#SI_figure
 
 save_plot("SI_dr.tif", SI_figure, width= 50, heigh=40, dpi=300)
 

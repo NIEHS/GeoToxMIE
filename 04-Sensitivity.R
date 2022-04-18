@@ -199,26 +199,21 @@ run.dr.fun <- function(x){
                                tp = tp.ij,
                                AC50 = AC50.ij)
     
+    # print(mixture.result)
     GCA.eff[iter] <- exp(mixture.result$minimum)
     
-    IA.eff[iter] <- IA.pred(Cij,tp.ij,AC50.ij)
-    
-    
-    
-    
-    
     # Estimate the maximal response level of the mixture
-    max.result <- optimize(f = GCA.obj, interval = mixture.response.interval,
-                           Ci = Cij * 10^14,
-                           tp = tp.ij,
-                           AC50 = AC50.ij)
+    Emax_resp <- optimize(f = GCA.obj, interval = mixture.response.interval,
+                          Ci = Cij * 10^14,
+                          tp = tp.ij,
+                          AC50 = AC50.ij)
     
-    max.response <- exp(max.result$minimum)
+    Emax <- exp(Emax_resp$minimum)
+    
+    IA.eff[iter] <- IA.pred(Cij,tp.ij,AC50.ij, Emax)
     
     
-    
-    
-    E10 <- max.response * 0.1
+    E10 <- Emax * 0.1
     # Solve for EC10/AC10
     
     
@@ -260,5 +255,5 @@ run.dr.fun <- function(x){
 final.response.by.county <- lapply(1:length(cyp1a1_up.by.county),run.dr.fun)
 
 
-save(final.response.by.county,file = "/Volumes/SHAG/GeoTox/data/sensitivity_results_04_2_conc_resp.RData")
+save(final.response.by.county,file = "/Volumes/SHAG/GeoTox/data/sensitivity_results_conc_resp_20220415.RData")
 

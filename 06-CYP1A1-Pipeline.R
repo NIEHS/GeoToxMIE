@@ -19,7 +19,7 @@ library(reshape)
 library(scales)
 
 # load data
-load("/Volumes/SHAG/GeoTox/data/final_response_by_county_20220228.RData")
+load("/Volumes/SHAG/GeoTox/data/final_response_by_county_202200415.RData")
 
 load ("/Volumes/SHAG/GeoTox/data/FIPS_by_county.RData")
 FIPS <- as.data.frame(FIPS)
@@ -68,7 +68,7 @@ mean(subset(ivive.summary.df, health_measure == "GCA.HQ.10")$x95_quantile >1)*10
 
 # add FIPS
 ivive.summary.df <- left_join(ivive.summary.df, FIPS, by="id", keep=FALSE)
-#write.csv(ivive.summary.df, "/Volumes/SHAG/GeoTox/data/mc_all_summary_df_20220411.csv")
+#write.csv(ivive.summary.df, "/Volumes/SHAG/GeoTox/data/mc_all_summary_df_20220415.csv")
 
 # make data spatial
 ivive.summary.df_stack <- melt(ivive.summary.df[,2:ncol(ivive.summary.df)], id.vars=c("FIPS", "health_measure"))
@@ -100,7 +100,7 @@ histogram_HM <- ggplot(data=ivive.summary.df_stack, aes(x=log10(value)))+
   ylab("Count")+
   xlab("Log10 Risk Metric Value")
 histogram_HM
-save_plot("/Volumes/SHAG/GeoTox/data/plots/health_metric_histogram_20220411.tif", histogram_HM, width = 30, height = 30, dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/health_metric_histogram_20220415.tif", histogram_HM, width = 30, height = 30, dpi = 200)
 
 
 
@@ -128,7 +128,7 @@ GCA.Eff.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure =
   geom_sf(data = states, fill = NA, size=0.15)+
   theme(text = element_text(size = 12), legend.text=element_text(size = 8)) 
 GCA.Eff.plot
-save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_Eff_figureh_20220411.tif", GCA.Eff.plot, width = 40, height = 7, dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_Eff_figureh_20220415.tif", GCA.Eff.plot, width = 40, height = 7, dpi = 200)
 
 
 IA.Eff.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure == "IA.eff"), 
@@ -146,7 +146,7 @@ IA.Eff.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure ==
   geom_sf(data = states, fill = NA, size=0.15)+
   theme(text = element_text(size = 12), legend.text=element_text(size = 8)) 
 IA.Eff.plot
-save_plot("/Volumes/SHAG/GeoTox/data/plots/IA_Eff_figureh_20220411.tif", IA.Eff.plot, width = 40, height = 7, dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/IA_Eff_figureh_20220415.tif", IA.Eff.plot, width = 40, height = 7, dpi = 200)
 
 GCA.HQ.10.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure == "GCA.HQ.10"), 
                       aes(fill=value))+
@@ -165,7 +165,7 @@ GCA.HQ.10.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure
   geom_sf(data = states, fill = NA, size=0.15)+
   theme(text = element_text(size = 12), legend.text=element_text(size = 8)) 
 GCA.HQ.10.plot
-save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_HQ10_figureh_20220411.tif", GCA.HQ.10.plot, width = 40, height = 7, dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_HQ10_figureh_20220415.tif", GCA.HQ.10.plot, width = 40, height = 7, dpi = 200)
 
 HQ.1.10.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure == "GCA.HQ.10" & value >1), 
                          aes(fill=value))+
@@ -178,7 +178,7 @@ HQ.1.10.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure =
   scale_fill_viridis_c(name = "RQ >1",direction = -1,option = "A")+
   theme(text = element_text(size = 12), legend.text=element_text(size = 8)) 
 HQ.1.10.plot
-#save_plot("/Volumes/SHAG/GeoTox/data/plots/HQ10_1_figureh_20220411.tif", HQ.1.10.plot, width = 40, height = 7, dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/HQ10_1_figureh_20220415.tif", HQ.1.10.plot, width = 40, height = 7, dpi = 200)
 
 
 IA.HQ.10.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure == "IA.HQ.10"), 
@@ -198,7 +198,7 @@ IA.HQ.10.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure 
   geom_sf(data = states, fill = NA, size=0.15)+
   theme(text = element_text(size = 12), legend.text=element_text(size = 8)) 
 IA.HQ.10.plot
-save_plot("/Volumes/SHAG/GeoTox/data/plots/IA_HQ10_figureh_20220411.tif", IA.HQ.10.plot, width = 40, height = 7, dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/IA_HQ10_figureh_20220415.tif", IA.HQ.10.plot, width = 40, height = 7, dpi = 200)
 
 # 2x3 plot 
 GCA=ggarrange(GCA.Eff.plot , GCA.HQ.10.plot, 
@@ -209,7 +209,7 @@ GCA=ggarrange(GCA.Eff.plot , GCA.HQ.10.plot,
                      ncol = 1, nrow = 2,
                      font.label = list(size = 20, color = "black", face = "bold"),
                      common.legend = FALSE)
-save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_composite_20220411.tif", GCA, width = 40, height = 15, dpi = 300)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_composite_20220415.tif", GCA, width = 40, height = 15, dpi = 300)
 
 IA=ggarrange(IA.Eff.plot , IA.HQ.10.plot, 
               labels = c( "A", "B"),
@@ -219,7 +219,7 @@ IA=ggarrange(IA.Eff.plot , IA.HQ.10.plot,
               ncol = 1, nrow = 2,
               font.label = list(size = 20, color = "black", face = "bold"),
               common.legend = FALSE)
-save_plot("/Volumes/SHAG/GeoTox/data/plots/IA_composite_20220411.tif", IA, width = 40, height = 15, dpi = 300)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/IA_composite_20220415.tif", IA, width = 40, height = 15, dpi = 300)
 
 all=ggarrange(GCA.Eff.plot , GCA.HQ.10.plot, IA.Eff.plot , IA.HQ.10.plot, 
              labels = c( "(A) Concentration Addition - Response", "(B) Concentration Addition - Hazard Quotient",
@@ -229,6 +229,6 @@ all=ggarrange(GCA.Eff.plot , GCA.HQ.10.plot, IA.Eff.plot , IA.HQ.10.plot,
              ncol = 1, nrow = 4,
              font.label = list(size = 20, color = "black", face = "bold"),
              common.legend = FALSE)
-save_plot("/Volumes/SHAG/GeoTox/data/plots/All_composite_20220411.tif", all, width = 40, height = 40, dpi = 300)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/All_composite_20220415.tif", all, width = 40, height = 40, dpi = 300)
 
 

@@ -14,12 +14,12 @@ library(scales)
 
 ## Sensitivity plots with each of the MC.iterations
 # load data
-sensitivity.ext.conc <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_05_2_ext_conc.RData"))
-sensitivity.httk <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_03_2_httk.RData"))
-sensitivity.obesity <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_02_2_obesity.RData"))
-sensitivity.age <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_01_2_age.RData"))
-baseline <- get(load("/Volumes/SHAG/GeoTox/data/final_response_by_county_20220228.RData"))
-sensitivity.conc.resp <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_04_2_conc_resp.RData"))
+sensitivity.ext.conc <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_ext_conc_20220415.RData"))
+sensitivity.httk <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_httk_20220415.RData"))
+sensitivity.obesity <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_obesity_20220415.RData"))
+sensitivity.age <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_age_20220415.RData"))
+baseline <- get(load("/Volumes/SHAG/GeoTox/data/final_response_by_county_202200415.RData"))
+sensitivity.conc.resp <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_conc_resp_20220415.RData"))
 
 
 #### Efficacy - GCA ####
@@ -63,7 +63,7 @@ conc.resp.plot.GCA <-ggplot(CR.melt, aes(x = value, y = as.factor(X2), fill = as
   theme(text = element_text(size = 14), legend.position="none", axis.text=element_text(size=14),
         axis.title=element_text(size=14)) 
 conc.resp.plot.GCA
-save_plot("/Volumes/SHAG/GeoTox/data/plots/Sensitivity_GCA_Eff_20220218.tif", conc.resp.plot.GCA,dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/Sensitivity_GCA_Eff__20220415.tif", conc.resp.plot.GCA,dpi = 200)
 
 
 #### Efficacy - IA model ####
@@ -103,7 +103,7 @@ conc.resp.plot.IA <-ggplot(CR.IA.melt, aes(x = value, y = as.factor(X2), fill = 
   theme(text = element_text(size = 14), legend.position="none", axis.text=element_text(size=14),
         axis.title=element_text(size=14)) 
 conc.resp.plot.IA
-save_plot("/Volumes/SHAG/GeoTox/data/plots/Sensitivity_IA_Eff_20220218.tif", conc.resp.plot.IA,  dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/Sensitivity_IA_Eff__20220415.tif", conc.resp.plot.IA,  dpi = 200)
 
 ##### HQ - GCA model ####
 sensitivity.GCA.HQ.10<- NULL
@@ -143,7 +143,7 @@ HQ.plot.GCA <-ggplot(HQ.GCA.melt, aes(x = value, y = as.factor(X2), fill = as.fa
   theme(text = element_text(size = 14), legend.position="none", axis.text=element_text(size=14),
         axis.title=element_text(size=14)) 
 HQ.plot.GCA
-save_plot("/Volumes/SHAG/GeoTox/data/plots/Sensitivity_GCA_HQ_20220411.tif", HQ.plot.GCA, dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/Sensitivity_GCA_HQ_20220415.tif", HQ.plot.GCA, dpi = 200)
 
 
 
@@ -185,7 +185,7 @@ HQ.plot.IA <-ggplot(HQ.IA.melt, aes(x = value, y = as.factor(X2), fill = as.fact
   theme(text = element_text(size = 14), legend.position="none", axis.text=element_text(size=14),
         axis.title=element_text(size=14)) 
 HQ.plot.IA
-save_plot("/Volumes/SHAG/GeoTox/data/plots/Sensitivity_IA_HQ_220220411.tif", HQ.plot.IA)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/Sensitivity_IA_HQ_20220415.tif", HQ.plot.IA)
 
 
 #### Combine Plots ####
@@ -198,7 +198,7 @@ GCA=ggarrange(conc.resp.plot.GCA , HQ.plot.GCA,
               font.label = list(size = 20, color = "black", face = "bold"),
               common.legend = FALSE)
 GCA
-save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_sensitivity_composite_20220411.tif", GCA, width = 40, height = 20, dpi = 300)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_sensitivity_composite_20220415.tif", GCA, width = 40, height = 20, dpi = 300)
 
 IA=ggarrange(conc.resp.plot.IA , HQ.plot.IA, 
               labels = c( "A", "B"),
@@ -209,5 +209,5 @@ IA=ggarrange(conc.resp.plot.IA , HQ.plot.IA,
               font.label = list(size = 20, color = "black", face = "bold"),
               common.legend = FALSE)
 IA
-save_plot("/Volumes/SHAG/GeoTox/data/plots/IA_sensitivity_composite_20220411.tif", IA, width = 40, height = 20, dpi = 300)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/IA_sensitivity_composite_20220415.tif", IA, width = 40, height = 20, dpi = 300)
 
