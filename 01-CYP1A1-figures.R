@@ -19,6 +19,7 @@ library(forcats)
 
 # Import data
 hill2.fit <- get(load("/Volumes/SHAG/GeoTox/data/Hill_2param_model_fit.RData"))
+hill2.fit$chnm <- rownames(hill2.fit)
 
 #NATA
 nata_df<- read.csv("/Volumes/SHAG/GeoTox/data/2014_NATA_CONCS.csv")
@@ -106,13 +107,14 @@ nata_county_cyp1a1_up<- nata_county_cyp1a1_up[!is.na(nata_county_cyp1a1_up$conce
 nata_county_cyp1a1_up <-  mutate(nata_county_cyp1a1_up, 
                                  count = ifelse(concentration >0, 1, 0))
 #### Heatmap ####
-heatmap_df<- as.data.frame(nata_county_cyp1a1_up) %>%
-  group_by(aenm, chnm) %>%
-  summarise(mean=mean(AC50))%>%
+heatmap_cyp1a1_df<- left_join(nata_county_cyp1a1_up, hill2.fit, by= c("casrn" = "casn"), keep=FALSE )
+heatmap_df<- as.data.frame(heatmap_cyp1a1_df) %>%
+  group_by(aenm, chnm.y) %>%
+  summarise(mean=mean(10^(logAC50)))%>%
   as.data.frame()
 summary(heatmap_df$mean)
 
-heatmap_cyp1a1_up <- ggplot(heatmap_df, aes(x = fct_reorder(chnm, mean),y = aenm,  fill= mean)) + 
+heatmap_cyp1a1_up <- ggplot(heatmap_df, aes(x = fct_reorder(chnm.y, mean),y = aenm,  fill= mean)) + 
   geom_tile()+
   theme_bw()+
   scale_fill_viridis_c(direction = 1,option = "A") +
@@ -215,7 +217,7 @@ cyp1a1_v=ggarrange(cyp1a1_up_all_map, count_cyp1a1_up_map, heatmap_cyp1a1_up,
 
 
 #Plot figures with dpi=300
-save_plot("/Volumes/SHAG/GeoTox/data/plots/Figure3_v20220324.tif", cyp1a1_v, width = 36, height = 50, dpi = 300)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/Figure3_v20220420.tif", cyp1a1_v, width = 36, height = 50, dpi = 300)
 
 
 
