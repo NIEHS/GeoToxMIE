@@ -217,7 +217,7 @@ cyp1a1_v=ggarrange(cyp1a1_up_all_map, count_cyp1a1_up_map, heatmap_cyp1a1_up,
 
 
 #Plot figures with dpi=300
-save_plot("/Volumes/SHAG/GeoTox/data/plots/Figure3_v20220420.tif", cyp1a1_v, width = 36, height = 50, dpi = 300)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/Figure3_v20220420.tif", cyp1a1_v, width = 45, height = 55, dpi = 300)
 
 
 
