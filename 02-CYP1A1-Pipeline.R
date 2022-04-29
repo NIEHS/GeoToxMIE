@@ -63,10 +63,19 @@ census.age.overlap <- census.age[idx.FIPS,]
 
 age.by.county <- census.age.sim(MC.iter,census.age.overlap)
 
+age.by.county.melt <-  melt(age.by.county)
+age.summary <- age.by.county.melt %>%
+  group_by(L1)%>%
+  summarise(age_median = median(value, na.rm = TRUE))
+write.csv(age.summary, "age_by_county.csv", row.names = FALSE)
 
 #### Inhalation Rate per body weight-by age #####
 IR.by.county <- sim.IR.BW(MC.iter,age.by.county)
-
+IR.by.county.melt <-  melt(IR.by.county)
+IR.summary <- IR.by.county.melt %>%
+  group_by(L1)%>%
+  summarise(IR_median = median(value, na.rm = TRUE))
+write.csv(IR.summary, "IR_by_county.csv", row.names = FALSE)
 
 #### CDC PLACES data on Obesity and Kidney disease prevalence ####
 
@@ -102,6 +111,15 @@ obesity.binom.p <- lapply(1:length(places$OBESITY_CrudePrev),
 obesity.by.county <- lapply(1:length(obesity.binom.p),
                            function(x)rbinom(MC.iter,size = 1,
                                              p = obesity.binom.p[[x]]/100)) 
+
+obesity.by.county.melt <-  melt(obesity.by.county)
+hist(obesity.by.county.melt$value)
+obesity.summary <- obesity.by.county.melt %>%
+  group_by(L1)%>%
+  summarise(obesity_median = median(value, na.rm = TRUE))
+write.csv(obesity.summary, "obesity_by_county.csv", row.names = FALSE)
+
+
 # Restrict these to be only >=18
 obesity.by.county <- lapply(1:length(obesity.by.county),function(x){
   val <- rep("Blank",length(obesity.by.county[[x]]))
