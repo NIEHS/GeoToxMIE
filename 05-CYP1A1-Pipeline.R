@@ -153,15 +153,14 @@ E10 <- Emax * 0.1
   }
   
 
-  df <- data.frame("GCA.Eff"= GCA.eff,"IA.eff" = IA.eff, 
-                   "GCA.HQ.10" = GCA.HQ.10,"IA.HQ.10" = IA.HQ.10)
+  df <- data.frame("GCA"= GCA.eff,"IA" = IA.eff, "HQ.10" = IA.HQ.10)
   return(df)
 }
 
 # This should be a list by county, with MC.iter elements in each list entry
 final.response.by.county <- lapply(1:length(cyp1a1_up.by.county),run.dr.fun)
 
-save(final.response.by.county,file = "/Volumes/SHAG/GeoTox/data/final_response_by_county_202200415.RData")
+save(final.response.by.county,file = "/Volumes/SHAG/GeoTox/data/final_response_by_county_202200428.RData")
 
 
 
