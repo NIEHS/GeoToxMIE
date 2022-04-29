@@ -106,6 +106,10 @@ nata_county_cyp1a1_up<- nata_county_cyp1a1_up[!is.na(nata_county_cyp1a1_up$ACC),
 nata_county_cyp1a1_up<- nata_county_cyp1a1_up[!is.na(nata_county_cyp1a1_up$concentration), ]
 nata_county_cyp1a1_up <-  mutate(nata_county_cyp1a1_up, 
                                  count = ifelse(concentration >0, 1, 0))
+
+nata_county_cyp1a1_up$chnm<- str_replace_all(nata_county_cyp1a1_up$chnm, "C.I. Disperse Black 6", "3,3'-Dimethoxybenzidine")
+nata_county_cyp1a1_up$chnm <- str_replace_all(nata_county_cyp1a1_up$chnm, "C.I. Azoic Diazo Component", "Benzidine")
+
 #### Heatmap ####
 heatmap_cyp1a1_df<- left_join(nata_county_cyp1a1_up, hill2.fit, by= c("casrn" = "casn"), keep=FALSE )
 heatmap_df<- as.data.frame(heatmap_cyp1a1_df) %>%
@@ -131,12 +135,14 @@ heatmap_cyp1a1_up
 #save_plot("heatmap_cyp1a1_up.tif", heatmap_cyp1a1_up, width = 40, height = 30, dpi = 200)
 
 ##### Facet Wrap Map ####
+nata_county_cyp1a1_up<- left_join(nata_county_cyp1a1_up, hill2.fit, by= c("casrn" = "casn"), keep=FALSE )
 cyp1a1_up_nata_county_sp <- left_join(county_2014, nata_county_cyp1a1_up, by=c("countyid" = "FIPS"), keep=FALSE)
 cyp1a1_up_nata_county_sf <-st_as_sf(cyp1a1_up_nata_county_sp)
+cyp1a1_up_nata_county_sf = order(cyp1a1_up_nata_county_sf, cyp1a1_up_nata_county_sf$logAC50)
 
 cyp1a1_up_all_map <- ggplot(data = cyp1a1_up_nata_county_sf, aes(fill=concentration_norm)) +
   geom_sf(lwd = 0)+
-  facet_wrap(vars(chnm), ncol=7)+
+  facet_wrap(vars(fct_reorder(chnm.x, logAC50)), ncol=7)+
   theme_bw()+
   geom_sf(data = subset(cyp1a1_up_nata_county_sf, concentration == 0), aes(fill=concentration), fill = "light grey", size=0)+
   geom_sf(data = states, fill = NA, size=0.15)+
@@ -148,7 +154,7 @@ cyp1a1_up_all_map <- ggplot(data = cyp1a1_up_nata_county_sf, aes(fill=concentrat
         strip.text = element_text(size = 10),
         text = element_text(size = 18))
 
-#cyp1a1_up_all_map
+cyp1a1_up_all_map
 #save_plot("facet_cyp1a1_up_nata.tif", cyp1a1_up_all_map, width = 40, height = 30, dpi = 200)
 
 
