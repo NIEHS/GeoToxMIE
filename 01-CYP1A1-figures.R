@@ -21,6 +21,9 @@ library(forcats)
 hill2.fit <- get(load("/Volumes/SHAG/GeoTox/data/Hill_2param_model_fit.RData"))
 hill2.fit$chnm <- rownames(hill2.fit)
 
+hill2.fit$chnm<- str_replace_all(hill2.fit$chnm, "C.I. Disperse Black 6", "3,3'-Dimethoxybenzidine")
+hill2.fit$chnm <- str_replace_all(hill2.fit$chnm, "C.I. Azoic Diazo Component", "Benzidine")
+
 #NATA
 nata_df<- read.csv("/Volumes/SHAG/GeoTox/data/2014_NATA_CONCS.csv")
 nata_chemicals <- read.csv("/Volumes/SHAG/GeoTox/data/NATA_pollutant_names_casrn.csv")
@@ -28,7 +31,7 @@ nata_chemicals <- read.csv("/Volumes/SHAG/GeoTox/data/NATA_pollutant_names_casrn
 
 ice_data <- get(load("/Volumes/SHAG/GeoTox/data//210105_ICE_cHTS_invitrodbv33.Rdata"))
 ice_data <- subset(ice_data, new_hitc == 1)
-states <- st_as_sf(map("state", plot = FALSE, fill = TRUE))
+states <- st_as_sf(maps::map("state", plot = FALSE, fill = TRUE))
 
 county_2014 <-st_read("/Volumes/SHAG/GeoTox/data/cb_2014_us_county_5m/cb_2014_us_county_5m.shp")
 county_2014$GEOID <- as.numeric(county_2014$GEOID)
@@ -138,7 +141,6 @@ heatmap_cyp1a1_up
 nata_county_cyp1a1_up<- left_join(nata_county_cyp1a1_up, hill2.fit, by= c("casrn" = "casn"), keep=FALSE )
 cyp1a1_up_nata_county_sp <- left_join(county_2014, nata_county_cyp1a1_up, by=c("countyid" = "FIPS"), keep=FALSE)
 cyp1a1_up_nata_county_sf <-st_as_sf(cyp1a1_up_nata_county_sp)
-cyp1a1_up_nata_county_sf = order(cyp1a1_up_nata_county_sf, cyp1a1_up_nata_county_sf$logAC50)
 
 cyp1a1_up_all_map <- ggplot(data = cyp1a1_up_nata_county_sf, aes(fill=concentration_norm)) +
   geom_sf(lwd = 0)+
@@ -153,8 +155,6 @@ cyp1a1_up_all_map <- ggplot(data = cyp1a1_up_nata_county_sf, aes(fill=concentrat
         legend.position="bottom", 
         strip.text = element_text(size = 10),
         text = element_text(size = 18))
-
-cyp1a1_up_all_map
 #save_plot("facet_cyp1a1_up_nata.tif", cyp1a1_up_all_map, width = 40, height = 30, dpi = 200)
 
 
@@ -184,29 +184,6 @@ count_cyp1a1_up_map <- ggplot(data = count_county_cyp1a1_up_sf, aes(fill=count))
         aspect.ratio=5/10)
 count_cyp1a1_up_map
 #save_plot("count_cyp1a1_up_uM_sumAC50.tif", count_cyp1a1_up_map, width = 40, height = 30, dpi = 200)
-
-#### Combine Plots H ####
-cyp1a1_up1=ggarrange(count_cyp1a1_up_map, heatmap_cyp1a1_up, 
-                     labels = c("B", "C"),
-                     #vjust = -0.005,
-                     #hjust = -0.5,
-                     ncol = 1, nrow = 2,
-                     #heights = c(1, 0.25), 
-                     font.label = list(size = 16, color = "black", face = "bold"),
-                     common.legend = FALSE)
-
-cyp1a1_up=ggarrange(cyp1a1_up_all_map, cyp1a1_up1,
-                    labels = c("A"),
-                    vjust = 1,
-                    #hjust = -0.5,
-                    ncol = 2, nrow = 1,
-                    #widths = c(1, 0.5),
-                    font.label = list(size = 16, color = "black", face = "bold"),
-                    common.legend = FALSE)
-
-#Plot figures with dpi=300
-save_plot("cyp1a1_up_3_figure2.tif", cyp1a1_up, width = 45, height = 40, dpi = 300)
-
 
 #### Combine Plots V ####
 cyp1a1_v=ggarrange(cyp1a1_up_all_map, count_cyp1a1_up_map, heatmap_cyp1a1_up, 
