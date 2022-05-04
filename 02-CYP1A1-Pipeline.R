@@ -112,6 +112,7 @@ obesity.by.county <- lapply(1:length(obesity.binom.p),
                            function(x)rbinom(MC.iter,size = 1,
                                              p = obesity.binom.p[[x]]/100)) 
 
+#summarize obesity by county
 obesity.by.county.melt <-  melt(obesity.by.county)
 hist(obesity.by.county.melt$value)
 obesity.summary <- obesity.by.county.melt %>%
