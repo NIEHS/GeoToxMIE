@@ -58,6 +58,13 @@ invitro.fun <- function(x){
 
 invitro.conc.by.county <- lapply(1:length(inhalation.dose.by.county),invitro.fun)
 
+#summarize internal by county
+invitro.conc.by.county.melt <-  melt(invitro.conc.by.county)
+internal.summary <- invitro.conc.by.county.melt %>%
+  group_by(L1, Var2)%>%
+  summarise(internal_median = median(value, na.rm = TRUE))
+write.csv(internal.summary, "internal_by_county.csv", row.names = FALSE)
+hist(invitro.conc.by.county.melt$value)
 
 
 
