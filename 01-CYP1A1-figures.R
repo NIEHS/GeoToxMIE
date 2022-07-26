@@ -16,6 +16,8 @@ library(stringr)
 library(maps)
 library(ggpubr)
 library(forcats)
+library(RWmisc)
+library(cowplot)
 
 # Import data
 hill2.fit <- get(load("/Volumes/SHAG/GeoTox/data/Hill_2param_model_fit.RData"))
@@ -45,6 +47,8 @@ county_2014<- subset(county_2014,  STATEFP != "69" )
 county_2014<- subset(county_2014,  STATEFP != "72" )
 county_2014<- subset(county_2014,  STATEFP != "78" )
 county_2014$countyid <-as.numeric(paste0(county_2014$STATEFP, county_2014$COUNTYFP))
+
+county_2014 <- st_simplify(county_2014, preserveTopology = FALSE, dTolerance = 1000)
 
 ###############################################################################
 # Determine what the overlap between NATA chemicals and tox21 chemicals
@@ -156,6 +160,27 @@ cyp1a1_up_all_map <- ggplot(data = cyp1a1_up_nata_county_sf, aes(fill=concentrat
         strip.text = element_text(size = 10),
         text = element_text(size = 18))
 #save_plot("facet_cyp1a1_up_nata.tif", cyp1a1_up_all_map, width = 40, height = 30, dpi = 200)
+
+# plot with individual concentrations for the facet
+
+webname <- unique(cyp1a1_up_nata_county_sf$chnm.x)
+
+maps_shared <- purrr::map(.x = webname, 
+                          .f = function(x) subset(cyp1a1_up_nata_county_sf)  %>% 
+                            filter(web_name == x) %>% 
+                            ggplot(aes(fill=concentration)) +
+                            geom_sf(lwd = 0)+
+                            theme_bw()+
+                            geom_sf(data = states, fill = NA, size=0.15)+
+                            scale_fill_viridis_c(name = "Conc. (ug/m3)", direction = -1,option = "A") +
+                            theme_rw() +
+                            theme(axis.text = element_blank(),
+                                  axis.ticks = element_blank())+
+                            ggtitle(x))
+
+plot2 <- plot_grid(plotlist = maps_shared, label_size = 12, ncol = 8)
+
+sjPlot::save_plot("facet_county_nata_concentrations.tif", plot2, width = 60, height = 50, dpi = 200)
 
 
 #### Count Map ####
