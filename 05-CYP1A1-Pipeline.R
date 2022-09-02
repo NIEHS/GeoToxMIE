@@ -1,8 +1,7 @@
 ######################################################
 # By: Kyle Messier
 # Date: Oct 22nd, 2021
-# Edits: Kristin Eccles
-# Updated, Run, 02/28/2022
+# Updated, Run, 09/01/2022
 # Written in R Version 4.0.2
 ######################################################
 # Fifth script in the main CYCP1A1 analysis pipeline
@@ -31,8 +30,8 @@ source(paste0(local.path,"helper_functions/ECmix-obj.R"),echo = FALSE)
 
 # load data 
 css.by.county <- get(load("/Volumes/SHAG/GeoTox/data/css_by_county_20220228.RData"))
-cyp1a1_up.by.county <- get(load("/Volumes/SHAG/GeoTox/data/CYP1A1_by_county_20220228.RData"))
-inhalation.dose.by.county <- get(load("/Volumes/SHAG/GeoTox/data/inhalation_dose_by_county_20220228.RData"))
+cyp1a1_up.by.county <- get(load("/Volumes/SHAG/GeoTox/data/CYP1A1_by_county_20220901.RData"))
+inhalation.dose.by.county <- get(load("/Volumes/SHAG/GeoTox/data/inhalation_dose_by_county_20220901.RData"))
 hill2.fit <- get(load("/Volumes/SHAG/GeoTox/data/Hill_2param_model_fit.RData"))
 
 
@@ -167,9 +166,4 @@ E10 <- Emax * 0.1
 # This should be a list by county, with MC.iter elements in each list entry
 final.response.by.county <- lapply(1:length(cyp1a1_up.by.county),run.dr.fun)
 
-save(final.response.by.county,file = "/Volumes/SHAG/GeoTox/data/final_response_by_county_202200428.RData")
-
-
-
-
-
+save(final.response.by.county,file = "/Volumes/SHAG/GeoTox/data/final_response_by_county_20220901.RData")

@@ -1,3 +1,5 @@
+# Updated, Run, 09/01/2022
+
 #load libraries
 library(psych)
 library(ggplot2)
@@ -18,12 +20,12 @@ range_scale<- function(x){(x-min(x))/(max(x)-min(x))}
 
 ## Sensitivity plots with each of the MC.iterations
 # load data
-sensitivity.ext.conc <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_ext_conc_20220415.RData"))
-sensitivity.httk <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_httk_20220415.RData"))
-sensitivity.obesity <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_obesity_20220415.RData"))
-sensitivity.age <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_age_20220415.RData"))
-baseline <- get(load("/Volumes/SHAG/GeoTox/data/final_response_by_county_202200415.RData"))
-sensitivity.conc.resp <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_conc_resp_20220415.RData"))
+sensitivity.ext.conc <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_ext_conc_20220901.RData"))
+sensitivity.httk <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_httk_20220901.RData"))
+sensitivity.obesity <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_obesity_20220901.RData"))
+sensitivity.age <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_age_20220901.RData"))
+baseline <- get(load("/Volumes/SHAG/GeoTox/data/final_response_by_county_20220901.RData"))
+sensitivity.conc.resp <- get(load("/Volumes/SHAG/GeoTox/data/sensitivity_results_conc_resp_20220901.RData"))
 
 
 #### GCA ####
@@ -35,8 +37,8 @@ for (x in 1:length(sensitivity.ext.conc)){
               sensitivity.obesity[[x]]$GCA.Eff,
               sensitivity.age[[x]]$GCA.Eff,
               sensitivity.conc.resp[[x]]$GCA.Eff,
-              baseline[[x]]$GCA.Eff)
-  
+              baseline[[x]]$GCA)
+
   sensitivity.GCA.Eff <- rbind(sensitivity.GCA.Eff,CR)
   
 
@@ -80,7 +82,7 @@ for (x in 1:length(sensitivity.ext.conc)){
               sensitivity.obesity[[x]]$IA.eff,
               sensitivity.age[[x]]$IA.eff,
               sensitivity.conc.resp[[x]]$IA.eff,
-              baseline[[x]]$IA.eff)
+              baseline[[x]]$IA)
   
   sensitivity.IA.eff <- rbind(sensitivity.IA.eff,CR)
   
@@ -94,9 +96,7 @@ colnames(sensitivity.IA.eff) <- c("External Concentration","Toxicokinetic Parame
 #sensitivity.IA.eff.norm <- scale(sensitivity.IA.eff, center = TRUE, scale = FALSE)
 
 CR.IA.melt <- melt(sensitivity.IA.eff)
-
-CR.IA.melt$Var2 <- factor(CR.IA.melt$Var2, levels = c( "External Concentration","Toxicokinetic Parameters",
-                                             "Concentration-Response","Age","Obesity", "Baseline"))
+CR.IA.melt$Var2 <- CR.IA.melt$X2
 
 conc.resp.plot.IA <-ggplot(CR.IA.melt, aes(x = value, y = as.factor(Var2), fill = as.factor(Var2))) +
   stat_density_ridges( #bandwidth = 0.5
@@ -120,9 +120,12 @@ conc.resp.plot.IA <-ggplot(CR.IA.melt, aes(x = value, y = as.factor(Var2), fill 
 sensitivity.IA.HQ.10 <- NULL
 for (x in 1:length(sensitivity.ext.conc)){
   print(x)
-  CR <- cbind(sensitivity.ext.conc[[x]]$IA.HQ.10,sensitivity.httk[[x]]$IA.HQ.10,
-              sensitivity.obesity[[x]]$IA.HQ.10,sensitivity.age[[x]]$IA.HQ.10,
-              sensitivity.conc.resp[[x]]$IA.HQ.10,baseline[[x]]$IA.HQ.10)
+  CR <- cbind(sensitivity.ext.conc[[x]]$IA.HQ.10,
+              sensitivity.httk[[x]]$IA.HQ.10,
+              sensitivity.obesity[[x]]$IA.HQ.10,
+              sensitivity.age[[x]]$IA.HQ.10,
+              sensitivity.conc.resp[[x]]$IA.HQ.10,
+              baseline[[x]]$HQ.10)
   
   sensitivity.IA.HQ.10 <- rbind(sensitivity.IA.HQ.10,CR)
   
@@ -133,12 +136,9 @@ colnames(sensitivity.IA.HQ.10) <- c("External Concentration","Toxicokinetic Para
                                     "Obesity","Age","Concentration-Response",
                                     "Baseline")
 
-#sensitivity.IA.HQ.10.norm <- scale(sensitivity.IA.HQ.10, center = TRUE, scale = FALSE)
-
 HQ.IA.melt <- melt(sensitivity.IA.HQ.10)
 
-HQ.IA.melt$Var2 <- factor(HQ.IA.melt$Var2, levels = c( "External Concentration","Toxicokinetic Parameters",
-                                                     "Concentration-Response","Age","Obesity", "Baseline"))
+HQ.IA.melt$Var2 <- HQ.IA.melt$X2
 
 HQ.plot.IA <-ggplot(HQ.IA.melt, aes(x = value, y = as.factor(Var2), fill = as.factor(Var2))) +
   stat_density_ridges( #bandwidth = 0.5
@@ -177,9 +177,11 @@ composite=ggarrange(conc.resp.plot.GCA , conc.resp.plot.IA , HQ.plot.IA,
 # new sensitivity analysis figure
 HQ.IA.melt$Group <- "RQ"
 CR.IA.melt$Group  <- "CA/IA"
+combined_df <- rbind(HQ.IA.melt, CR.IA.melt)
 
 detach(package:plyr)
 
+# calculate range for reviewer
 IQR_HQ <- HQ.IA.melt%>%
   group_by(Group, as.factor(Var2))%>%
   summarize(IQR = quantile(value, 0.99, na.rm = TRUE) - quantile(value, 0.01, na.rm = TRUE))
@@ -189,11 +191,6 @@ IQR_CA <- combined_df%>%
   group_by(Group, as.factor(Var2))%>%
   summarize(IQR = quantile(value, 0.99, na.rm = TRUE) - quantile(value, 0.01, na.rm = TRUE))
 IQR_CA
-
-
-combined_df$Var2 <- factor(combined_df$Var2, levels = c( "External Concentration","Toxicokinetic Parameters",
-                                                       "Concentration-Response","Age","Obesity", "Baseline"))
-
 
 combined_plot <-ggplot(CR.IA.melt, aes(x = value, y = as.factor(Group), fill = NA, color = Var2)) +
   stat_density_ridges( #bandwidth = 0.5
@@ -213,7 +210,7 @@ combined_plot <-ggplot(CR.IA.melt, aes(x = value, y = as.factor(Group), fill = N
         axis.title=element_text(size=14)) 
 combined_plot
 
-HQ_plot <-ggplot(HQ.IA.melt, aes(x = value, y = as.factor(Var2), fill = NA, color = Var2)) +
+HQ_plot <-ggplot(HQ.IA.melt, aes(x = value, y = as.factor(Group), fill = NA, color = Var2)) +
   stat_density_ridges( #bandwidth = 0.5
     #geom = "density_ridges_gradient", 
     calc_ecdf = FALSE, 
@@ -242,7 +239,7 @@ composite2=ggarrange(combined_plot , HQ_plot ,
                     common.legend = TRUE, 
                     legend = "right")
 composite2
-save_plot("/Volumes/SHAG/GeoTox/data/plots/sensitivity_composite2_202204819.tif", composite2, width = 35, height = 20, dpi = 300)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/sensitivity_composite2_20220901.tif", composite2, width = 35, height = 20, dpi = 300)
 
 
 

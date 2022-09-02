@@ -2,7 +2,7 @@
 # By: Kristin Eccles
 # Date: Oct 22nd, 2021
 # Edits: Kyle Messier
-# Updated, Run, 02/08/2022
+# Updated, Run, 09/01/2022
 # Written in R Version 4.0.2
 ######################################################
 
@@ -19,7 +19,7 @@ library(reshape)
 library(scales)
 
 # load data
-load("/Volumes/SHAG/GeoTox/data/final_response_by_county_20220422.RData")
+load("/Volumes/SHAG/GeoTox/data/final_response_by_county_20220901.RData")
 
 load ("/Volumes/SHAG/GeoTox/data/FIPS_by_county.RData")
 FIPS <- as.data.frame(FIPS)
@@ -96,7 +96,7 @@ histogram_HM <- ggplot(data=ivive.summary.df_stack, aes(x=log10(value)))+
   ylab("Count")+
   xlab("Log10 Risk Metric Value")
 histogram_HM
-save_plot("/Volumes/SHAG/GeoTox/data/plots/health_metric_histogram_20220422.tif", histogram_HM, width = 30, height = 30, dpi = 200)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/health_metric_histogram_20220901.tif", histogram_HM, width = 30, height = 30, dpi = 200)
 
 
 
@@ -115,16 +115,16 @@ GCA.Eff.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure =
   facet_wrap(~variable, nrow=2, ncol=3, labeller = plot.labs)+
   theme_bw()+
   labs(fill="Sum")+
-  scale_fill_viridis_c(name = "Predicted Response \nLog2 Fold Change \nmRNA Expression",direction = -1,option = "A",trans = "sqrt",
-                       limits = c(0, 
-                                  max(subset(ivive_county_cyp1a1_up_sf, health_measure == "GCA")$value)),
-                       breaks = c(seq(min(subset(ivive_county_cyp1a1_up_sf, health_measure == "GCA")$value),
-                                      max(subset(ivive_county_cyp1a1_up_sf, health_measure == "GCA")$value),by = 0.5)),
-                       label = function(x) sprintf("%.2f", x))+
+  scale_fill_viridis_c(name = "Predicted Response \nLog2 Fold Change \nmRNA Expression",direction = -1,option = "A",trans = "sqrt")+
+  #scale_fill_viridis_c(name = "Predicted Response \nLog2 Fold Change \nmRNA Expression",direction = -1,option = "A",trans = "sqrt",
+  #limits = c(0, max(subset(ivive_county_cyp1a1_up_sf, health_measure == "GCA")$value)),
+  #breaks = c(seq(min(subset(ivive_county_cyp1a1_up_sf, health_measure == "GCA")$value),
+  #max(subset(ivive_county_cyp1a1_up_sf, health_measure == "GCA")$value),by = 0.5)),
+  #label = function(x) sprintf("%.2f", x))+
   geom_sf(data = states, fill = NA, size=0.15)+
   theme(text = element_text(size = 12), legend.text=element_text(size = 8)) 
 GCA.Eff.plot
-#save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_Eff_figureh_20220428.tif", GCA.Eff.plot, width = 40, height = 7, dpi = 200)
+#save_plot("/Volumes/SHAG/GeoTox/data/plots/GCA_Eff_figureh_20220901.tif", GCA.Eff.plot, width = 40, height = 7, dpi = 200)
 
 
 IA.Eff.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure == "IA"), 
@@ -133,30 +133,26 @@ IA.Eff.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure ==
   facet_wrap(~variable, nrow=2, ncol=3, labeller = plot.labs)+
   theme_bw()+
   labs(fill="Sum")+
-  scale_fill_viridis_c(name = "Predicted Response \nLog2 Fold Change \nmRNA Expression" ,direction = -1,option = "A",trans = "sqrt",
-                       limits = c(NA, 
-                                  max(subset(ivive_county_cyp1a1_up_sf, health_measure == "IA")$value)),
-                       breaks = c(seq(min(subset(ivive_county_cyp1a1_up_sf, health_measure == "IA")$value),
-                                      max(subset(ivive_county_cyp1a1_up_sf, health_measure == "IA")$value),by = 0.5)),
-                       label = function(x) sprintf("%.2f", x))+
+  scale_fill_viridis_c(name = "Predicted Response \nLog2 Fold Change \nmRNA Expression" ,direction = -1,option = "A",trans = "sqrt")+
   geom_sf(data = states, fill = NA, size=0.15)+
   theme(text = element_text(size = 12), legend.text=element_text(size = 8)) 
 IA.Eff.plot
-#save_plot("/Volumes/SHAG/GeoTox/data/plots/IA_Eff_figureh_20220428.tif", IA.Eff.plot, width = 40, height = 7, dpi = 200)
+#save_plot("/Volumes/SHAG/GeoTox/data/plots/IA_Eff_figureh_20220901.tif", IA.Eff.plot, width = 40, height = 7, dpi = 200)
 
-HQ.1.10.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure == "HQ.10" & value >1), 
-                         aes(fill=value))+
-  geom_sf(data = states, fill = "light grey", size=0.15)+
-  geom_sf(lwd = 0)+
-  geom_sf(fill=NA, lwd =0.05)+
-  geom_sf(data = states, fill = NA, size=0.15)+
-  facet_wrap(~variable, nrow=2, ncol=3, labeller = plot.labs)+
-  theme_bw()+
-  scale_fill_viridis_c(name = "RQ >1",direction = -1,option = "A")+
-  theme(text = element_text(size = 12), legend.text=element_text(size = 8)) 
-HQ.1.10.plot
-save_plot("/Volumes/SHAG/GeoTox/data/plots/HQ10_1_figureh_20220428.tif", HQ.1.10.plot, width = 20, height = 7, dpi = 200)
-
+# for one day, no RQ >1
+# HQ.1.10.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure == "HQ.10" & value >1), 
+#                          aes(fill=value))+
+#   geom_sf(data = states, fill = "light grey", size=0.15)+
+#   geom_sf(lwd = 0)+
+#   geom_sf(fill=NA, lwd =0.05)+
+#   geom_sf(data = states, fill = NA, size=0.15)+
+#   facet_wrap(~variable, nrow=2, ncol=3, labeller = plot.labs)+
+#   theme_bw()+
+#   scale_fill_viridis_c(name = "RQ >1",direction = -1,option = "A")+
+#   theme(text = element_text(size = 12), legend.text=element_text(size = 8)) 
+# HQ.1.10.plot
+# save_plot("/Volumes/SHAG/GeoTox/data/plots/HQ10_1_figureh_20220901.tif", HQ.1.10.plot, width = 20, height = 7, dpi = 200)
+# 
 
 HQ.10.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure == "HQ.10"), 
                          aes(fill=value))+
@@ -164,18 +160,11 @@ HQ.10.plot <- ggplot(data = subset(ivive_county_cyp1a1_up_sf, health_measure == 
   facet_wrap(~variable, nrow=2, ncol=3, labeller = plot.labs)+
   theme_bw()+
   labs(fill="Sum")+
-  scale_fill_viridis_c(name = "Risk Quotient",direction = -1,option = "A",trans = "sqrt",
-                       limits = c(0, 
-                                  round(max(subset(ivive_county_cyp1a1_up_sf, health_measure == "HQ.10")$value))), 
-                       breaks = c(round(min(subset(ivive_county_cyp1a1_up_sf, health_measure == "HQ.10")$value)),
-                                  10^seq(round(min(subset(ivive_county_cyp1a1_up_sf, health_measure == "HQ.10")$value)),
-                                         round(max(subset(ivive_county_cyp1a1_up_sf, health_measure == "HQ.10")$value)),by = 0.5)), 
-                       oob = scales::squish, 
-                       label = function(x) sprintf("%.1f", x))+
+  scale_fill_viridis_c(name = "Risk Quotient",direction = -1,option = "A",trans = "sqrt")+
   geom_sf(data = states, fill = NA, size=0.15)+
   theme(text = element_text(size = 12), legend.text=element_text(size = 8)) 
 HQ.10.plot
-#save_plot("/Volumes/SHAG/GeoTox/data/plots/HQ10_figureh_20220428.tif", IA.HQ.10.plot, width = 40, height = 7, dpi = 200)
+#save_plot("/Volumes/SHAG/GeoTox/data/plots/HQ10_figureh_20220901.tif", IA.HQ.10.plot, width = 40, height = 7, dpi = 200)
 
 # 3x3 plot 
 composite_plot=ggarrange(GCA.Eff.plot , IA.Eff.plot, HQ.10.plot,
@@ -186,4 +175,4 @@ composite_plot=ggarrange(GCA.Eff.plot , IA.Eff.plot, HQ.10.plot,
                      ncol = 1, nrow = 3,
                      font.label = list(size = 20, color = "black", face = "bold"),
                      common.legend = FALSE)
-save_plot("/Volumes/SHAG/GeoTox/data/plots/composite_plot_20220428.tif", composite_plot, width = 40, height = 25, dpi = 300)
+save_plot("/Volumes/SHAG/GeoTox/data/plots/composite_plot_20220901.tif", composite_plot, width = 40, height = 25, dpi = 300)

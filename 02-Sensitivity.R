@@ -1,3 +1,4 @@
+# Updated, Run, 09/01/2022
 ##################################################################################################
 # Sensitivity analysis - varying obesity 
 
@@ -119,7 +120,7 @@ external.dose.by.county <- lapply(1:length(cyp1a1_up.by.county),sim.chem.fun)
 
 convert.fun <- function(x){
   print(x)
-  (external.dose.by.county[[x]]/1000) * replicate(ncol(external.dose.by.county[[x]]),IR.by.county[[x]] *365)
+  (external.dose.by.county[[x]]/1000) * replicate(ncol(external.dose.by.county[[x]]),IR.by.county[[x]] *1)
 }
 
 inhalation.dose.by.county <- lapply(1:length(external.dose.by.county),convert.fun)
@@ -238,5 +239,5 @@ run.dr.fun <- function(x){
 final.response.by.county <- lapply(1:length(cyp1a1_up.by.county),run.dr.fun)
 
 
-save(final.response.by.county,file = "/Volumes/SHAG/GeoTox/data/sensitivity_results_obesity_20220415.RData")
+save(final.response.by.county,file = "/Volumes/SHAG/GeoTox/data/sensitivity_results_obesity_20220901.RData")
 
